@@ -24,13 +24,13 @@ def _context_score(event: dict) -> float:
     score = 0.0
 
     # Known-bad source IP ranges (RFC 5737 TEST-NET used as stand-ins)
-    source_ip = event.get("source_ip", "")
+    source_ip = event.get("source_ip") or ""
     suspicious_prefixes = ("10.0.0.", "192.0.2.", "203.0.113.", "198.51.100.")
     if any(source_ip.startswith(p) for p in suspicious_prefixes):
         score += 0.3
 
     # Targeting high-value assets
-    target = event.get("target", "").lower()
+    target = (event.get("target") or "").lower()
     if any(k in target for k in ("admin", "root", "finance", "database", "vpn", "firewall")):
         score += 0.3
 
@@ -39,7 +39,7 @@ def _context_score(event: dict) -> float:
         score += 0.25
 
     # High-risk event type
-    event_type = event.get("event_type", "").upper()
+    event_type = (event.get("event_type") or "").upper()
     high_risk_types = {"RANSOMWARE", "LATERAL_MOVEMENT", "DATA_EXFIL", "PRIVILEGE_ESCALATION"}
     if event_type in high_risk_types:
         score += 0.25

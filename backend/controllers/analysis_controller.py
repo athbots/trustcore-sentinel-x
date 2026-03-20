@@ -2,11 +2,21 @@
 TrustCore Sentinel X — Analysis Controller
 ==========================================
 Orchestrates the full detection pipeline:
-  phishing detection → anomaly detection → risk scoring → autonomous response
+  phishing detection -> anomaly detection -> risk scoring -> autonomous response
 
 The controller is the business logic layer — routes delegate to this.
 Routes stay thin (HTTP concern only); this module owns the pipeline logic.
 """
+import sys
+import os
+
+# Make backend/ root importable regardless of invocation context
+_backend_root = os.path.dirname(os.path.abspath(__file__))
+# controllers/ is one level inside backend/, so go up one more
+_backend_root = os.path.dirname(_backend_root)
+if _backend_root not in sys.path:
+    sys.path.insert(0, _backend_root)
+
 
 from datetime import datetime, timezone
 from typing import Any
