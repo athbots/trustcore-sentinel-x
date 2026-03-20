@@ -1,0 +1,82 @@
+[
+  {
+    "scenario": "PayPal Phishing Email",
+    "risk_score": 61,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 1.0,
+    "anomaly_score": 0.2252
+  },
+  {
+    "scenario": "CEO Wire Fraud",
+    "risk_score": 54,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.8765,
+    "anomaly_score": 0.2007
+  },
+  {
+    "scenario": "DDoS Flood Attack",
+    "risk_score": 51,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 1.0
+  },
+  {
+    "scenario": "Port Scan Reconnaissance",
+    "risk_score": 46,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 1.0
+  },
+  {
+    "scenario": "Ransomware Encryption",
+    "risk_score": 60,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 1.0
+  },
+  {
+    "scenario": "Data Exfiltration",
+    "risk_score": 48,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 0.7945
+  },
+  {
+    "scenario": "Brute Force Login",
+    "risk_score": 43,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 0.9242
+  },
+  {
+    "scenario": "Phishing + Network Anomaly (Combined)",
+    "risk_score": 92,
+    "threat_level": "CRITICAL",
+    "action": "ISOLATE",
+    "phishing_score": 0.8749,
+    "anomaly_score": 1.0
+  },
+  {
+    "scenario": "SQL Injection Probe",
+    "risk_score": 46,
+    "threat_level": "MEDIUM",
+    "action": "ALERT",
+    "phishing_score": 0.0,
+    "anomaly_score": 1.0
+  },
+  {
+    "scenario": "Normal Web Traffic (Baseline)",
+    "risk_score": 13,
+    "threat_level": "LOW",
+    "action": "LOG",
+    "phishing_score": 0.1919,
+    "anomaly_score": 0.1427
+  }
+]

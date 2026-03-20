@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Phishing Email — PayPal Scam",
+    "payload": {
+      "text": "Your PayPal account has been limited. Verify your account immediately to restore access.",
+      "features": [800, 12, 0.52, 45, 0],
+      "source_ip": "203.0.113.45",
+      "target": "finance-gateway",
+      "event_type": "PHISHING",
+      "repeat_offender": false
+    },
+    "expected_threat": "HIGH"
+  },
+  {
+    "name": "DDoS Attack",
+    "payload": {
+      "text": "High volume request flood detected from external IP",
+      "features": [150000, 1200, 0.35, 0.5, 1],
+      "source_ip": "198.51.100.12",
+      "target": "api-server-prod",
+      "event_type": "DDOS",
+      "repeat_offender": true
+    },
+    "expected_threat": "CRITICAL"
+  },
+  {
+    "name": "Port Scan",
+    "payload": {
+      "text": "Sequential port probe detected across target subnet",
+      "features": [120, 450, 0.18, 0.2, 1],
+      "source_ip": "45.33.32.156",
+      "target": "firewall-mgmt",
+      "event_type": "PORT_SCAN",
+      "repeat_offender": false
+    },
+    "expected_threat": "HIGH"
+  },
+  {
+    "name": "Data Exfiltration",
+    "payload": {
+      "text": "Large encrypted outbound transfer from database server",
+      "features": [75000, 2, 0.97, 1800, 0],
+      "source_ip": "172.16.99.1",
+      "target": "database-server-01",
+      "event_type": "DATA_EXFIL",
+      "repeat_offender": true
+    },
+    "expected_threat": "CRITICAL"
+  },
+  {
+    "name": "Ransomware Activity",
+    "payload": {
+      "text": "Rapid file encryption pattern detected on host filesystem",
+      "features": [50000, 3, 0.99, 600, 1],
+      "source_ip": "10.0.0.254",
+      "target": "admin-portal.internal",
+      "event_type": "RANSOMWARE",
+      "repeat_offender": true
+    },
+    "expected_threat": "CRITICAL"
+  },
+  {
+    "name": "Brute Force Login",
+    "payload": {
+      "text": "Repeated failed authentication attempts on VPN concentrator",
+      "features": [1500, 180, 0.5, 15, 1],
+      "source_ip": "91.108.4.200",
+      "target": "vpn-concentrator",
+      "event_type": "BRUTE_FORCE",
+      "repeat_offender": true
+    },
+    "expected_threat": "HIGH"
+  },
+  {
+    "name": "Lateral Movement",
+    "payload": {
+      "text": "Internal host accessing unusual number of network shares",
+      "features": [5000, 25, 0.72, 90, 0],
+      "source_ip": "172.16.99.1",
+      "target": "root-ca-server",
+      "event_type": "LATERAL_MOVEMENT",
+      "repeat_offender": false
+    },
+    "expected_threat": "MEDIUM"
+  },
+  {
+    "name": "Normal Web Traffic",
+    "payload": {
+      "text": "User browsed to company intranet portal successfully",
+      "features": [2000, 8, 0.45, 90, 0],
+      "source_ip": "192.168.1.50",
+      "target": "user-workstation",
+      "event_type": "NORMAL",
+      "repeat_offender": false
+    },
+    "expected_threat": "SAFE"
+  },
+  {
+    "name": "Spear Phishing — CEO Fraud",
+    "payload": {
+      "text": "Wire transfer required urgently: Please approve $25,000 to supplier account by end of day",
+      "features": [600, 5, 0.55, 120, 0],
+      "source_ip": "185.220.101.5",
+      "target": "finance-gateway",
+      "event_type": "PHISHING",
+      "repeat_offender": false
+    },
+    "expected_threat": "HIGH"
+  },
+  {
+    "name": "SQL Injection Attempt",
+    "payload": {
+      "text": "Malformed SQL payload detected in HTTP POST body",
+      "features": [400, 30, 0.68, 5, 1],
+      "source_ip": "203.0.113.45",
+      "target": "api-server-prod",
+      "event_type": "SQL_INJECTION",
+      "repeat_offender": false
+    },
+    "expected_threat": "MEDIUM"
+  }
+]

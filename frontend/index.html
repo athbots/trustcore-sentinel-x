@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrustCore Sentinel X — Cyber Defense Dashboard</title>
+  <meta name="description" content="AI-powered autonomous cyber defense system — real-time threat detection, risk scoring, and automated response." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <!-- ── Header ───────────────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" fill="none" stroke="#00f5ff" stroke-width="2"/>
+          <polygon points="16,7 25,12 25,20 16,25 7,20 7,12" fill="rgba(0,245,255,0.08)" stroke="#00f5ff" stroke-width="1.5"/>
+          <circle cx="16" cy="16" r="3" fill="#00f5ff"/>
+        </svg>
+        <span class="logo-text">TrustCore <span class="accent">Sentinel X</span></span>
+      </div>
+    </div>
+    <div class="header-center">
+      <span class="status-dot" id="systemStatusDot"></span>
+      <span id="systemStatusLabel" class="status-label">CONNECTING…</span>
+    </div>
+    <div class="header-right">
+      <span class="uptime-label">Uptime: <span id="uptimeDisplay" class="mono">—</span></span>
+      <span class="version-tag">v1.0.0</span>
+    </div>
+  </header>
+
+  <!-- ── Main Grid ─────────────────────────────────────────────────────── -->
+  <main class="grid">
+
+    <!-- Risk Score Gauge -->
+    <section class="card card-gauge" id="gaugeCard">
+      <h2 class="card-title">Risk Score</h2>
+      <div class="gauge-container">
+        <svg class="gauge-svg" viewBox="0 0 200 120">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#00f5ff"/>
+              <stop offset="50%"  stop-color="#f5a623"/>
+              <stop offset="100%" stop-color="#ff2d55"/>
+            </linearGradient>
+          </defs>
+          <!-- Track -->
+          <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="14" stroke-linecap="round"/>
+          <!-- Fill arc -->
+          <path id="gaugeFill" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="251.2" stroke-dashoffset="251.2" style="transition: stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)"/>
+          <!-- Needle -->
+          <line id="gaugeNeedle" x1="100" y1="110" x2="100" y2="40" stroke="#fff" stroke-width="2" stroke-linecap="round"
+                style="transform-origin: 100px 110px; transition: transform 1s cubic-bezier(.4,0,.2,1)"/>
+          <circle cx="100" cy="110" r="5" fill="#fff"/>
+          <!-- Score text -->
+          <text id="gaugeScore" x="100" y="95" text-anchor="middle" class="gauge-number" fill="#ffffff">0</text>
+          <text x="100" y="108" text-anchor="middle" class="gauge-sub" fill="rgba(255,255,255,0.5)">/100</text>
+        </svg>
+        <div id="threatBadge" class="threat-badge badge-safe">SAFE</div>
+      </div>
+    </section>
+
+    <!-- Analyze Input -->
+    <section class="card card-analyze">
+      <h2 class="card-title">Threat Analysis</h2>
+      <div class="form-group">
+        <label class="form-label">Suspicious Text / Email Body</label>
+        <textarea id="inputText" class="form-input textarea" rows="3" placeholder="Paste email or log text here…">Verify your PayPal account immediately or it will be suspended</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Network Features <span class="hint">[bytes/s, req_rate, entropy, duration, port_risk]</span></label>
+        <input id="inputFeatures" class="form-input" value="500, 10, 0.45, 60, 0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Source IP (optional)</label>
+        <input id="inputIP" class="form-input" placeholder="e.g. 203.0.113.45" />
+      </div>
+      <div class="btn-row">
+        <button id="btnAnalyze" class="btn btn-primary" onclick="runAnalysis()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Analyze Threat
+        </button>
+        <button id="btnSimulate" class="btn btn-accent" onclick="simulateAttack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Simulate Attack
+        </button>
+      </div>
+    </section>
+
+    <!-- Component Scores -->
+    <section class="card card-scores">
+      <h2 class="card-title">Detection Breakdown</h2>
+      <div class="score-item">
+        <span class="score-name">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff2d55" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Phishing
+        </span>
+        <div class="score-bar-wrap"><div class="score-bar" id="barPhishing" data-color="#ff2d55"></div></div>
+        <span class="score-val" id="valPhishing">—</span>
+      </div>
+      <div class="score-item">
+        <span class="score-name">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Anomaly
+        </span>
+        <div class="score-bar-wrap"><div class="score-bar" id="barAnomaly" data-color="#f5a623"></div></div>
+        <span class="score-val" id="valAnomaly">—</span>
+      </div>
+      <div class="score-item">
+        <span class="score-name">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a259ff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Context
+        </span>
+        <div class="score-bar-wrap"><div class="score-bar" id="barContext" data-color="#a259ff"></div></div>
+        <span class="score-val" id="valContext">—</span>
+      </div>
+      <div class="verdict-row">
+        <div class="verdict-item">
+          <span class="verdict-label">Phishing verdict</span>
+          <span class="verdict-chip" id="chipPhishing">—</span>
+        </div>
+        <div class="verdict-item">
+          <span class="verdict-label">Anomaly verdict</span>
+          <span class="verdict-chip" id="chipAnomaly">—</span>
+        </div>
+      </div>
+      <div class="signals-box" id="signalsBox" style="display:none">
+        <span class="signals-title">⚠ Triggered Signals</span>
+        <div id="signalsList" class="signals-list"></div>
+      </div>
+    </section>
+
+    <!-- Auto Response -->
+    <section class="card card-response">
+      <h2 class="card-title">Autonomous Response</h2>
+      <div id="responsePanel" class="response-idle">
+        <div class="response-icon" id="responseIcon">🛡️</div>
+        <div class="response-action" id="responseAction">Awaiting analysis…</div>
+        <div class="response-detail" id="responseDetail">Run an analysis or simulate an attack to trigger automated defense.</div>
+      </div>
+    </section>
+
+    <!-- Event Feed -->
+    <section class="card card-feed">
+      <h2 class="card-title">Live Event Feed <span class="feed-count" id="feedCount">0 events</span></h2>
+      <div id="eventFeed" class="event-feed"></div>
+    </section>
+
+    <!-- Actions Log -->
+    <section class="card card-actions">
+      <h2 class="card-title">System Actions Log</h2>
+      <div id="actionsLog" class="actions-log"></div>
+    </section>
+
+  </main>
+
+  <!-- ── Result JSON Modal ─────────────────────────────────────────────── -->
+  <div id="jsonModal" class="modal" onclick="closeModal(event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>Full Analysis Result</span>
+        <button class="modal-close" onclick="document.getElementById('jsonModal').style.display='none'">✕</button>
+      </div>
+      <pre id="jsonContent" class="json-content"></pre>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
