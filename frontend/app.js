@@ -62,7 +62,7 @@ function setStatus(cls, label) {
 }
 
 // ── Gauge ──────────────────────────────────────────────────────────────────
-function setGauge(score, level) {
+function setGauge(score, level, confidence) {
   const ARC = 251.2;
   $('gaugeFill').style.strokeDashoffset = ARC - (ARC * Math.min(score, 100) / 100);
   $('gaugeNeedle').style.transform = `rotate(${-90 + (score/100)*180}deg)`;
@@ -72,6 +72,13 @@ function setGauge(score, level) {
   $('gaugeNeedle').style.stroke = col;
   $('threatBadge').textContent = level;
   $('threatBadge').className = `threat-badge badge-${classForLevel(level)}`;
+
+  // Confidence display
+  const confEl = $('confidenceDisplay');
+  if (confEl && confidence != null) {
+    confEl.textContent = `${Math.round(confidence * 100)}% confidence`;
+    confEl.style.opacity = '1';
+  }
 }
 
 // ── Bars ───────────────────────────────────────────────────────────────────
@@ -188,10 +195,19 @@ function updateUI(result, eventType) {
   const resp  = result.response || {};
   const expl  = result.explanation || {};
   const comp  = risk.component_scores || {};
+  const intel = result.intelligence || {};
 
-  setGauge(risk.risk_score ?? 0, risk.threat_level ?? 'SAFE');
+  setGauge(risk.risk_score ?? 0, risk.threat_level ?? 'SAFE', risk.confidence);
 
-  // Score bars — support both old schema (phishing/anomaly/context) and new (network_anomaly)
+  // System status indicator
+  const sysStatus = result.system_status || 'SECURE';
+  const statusEl = $('systemMode');
+  if (statusEl) {
+    statusEl.textContent = sysStatus;
+    statusEl.className = `system-mode mode-${sysStatus === 'UNDER ATTACK' ? 'attack' : 'secure'}`;
+  }
+
+  // Score bars
   setBar('barPhishing', comp.phishing ?? 0, '#ff2d55');
   setBar('barAnomaly',  comp.network_anomaly ?? comp.anomaly ?? 0, '#f5a623');
   setBar('barContext',  comp.context ?? 0, '#a259ff');
@@ -199,13 +215,26 @@ function updateUI(result, eventType) {
   $('valAnomaly').textContent  = `${Math.round(comp.network_anomaly ?? comp.anomaly ?? 0)}`;
   $('valContext').textContent  = `${Math.round(comp.context ?? 0)}`;
 
+  // Threat intel + behavior bars (if elements exist)
+  if ($('barThreatIntel')) setBar('barThreatIntel', comp.threat_intel ?? 0, '#ff6b6b');
+  if ($('barBehavior'))    setBar('barBehavior',    comp.behavior ?? 0, '#00f5ff');
+  if ($('valThreatIntel')) $('valThreatIntel').textContent = `${Math.round(comp.threat_intel ?? 0)}`;
+  if ($('valBehavior'))    $('valBehavior').textContent    = `${Math.round(comp.behavior ?? 0)}`;
+
   setChip('chipPhishing', phish.verdict || '—');
   setChip('chipAnomaly',  anom.verdict  || '—');
 
   showSignals(phish.signals || []);
 
   if (resp.action) { updateResponsePanel(resp); addToLog(resp); }
-  updateExplanation(expl);
+
+  // Enhanced explanation with intelligence
+  const enhancedExpl = Object.assign({}, expl);
+  if (risk.reason) enhancedExpl.summary = risk.reason;
+  if (intel.correlation?.matched) {
+    enhancedExpl.narrative = `⚡ Attack Chain: ${intel.correlation.chain_name}\n${intel.correlation.description}\nConfidence: ${Math.round(intel.correlation.confidence * 100)}%`;
+  }
+  updateExplanation(enhancedExpl);
   addToFeed(result, eventType);
 }
 

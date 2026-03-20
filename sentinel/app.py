@@ -1,7 +1,7 @@
 """
-TrustCore Sentinel X — Production FastAPI Application (v2.1)
+TrustCore Sentinel X — Production FastAPI Application (v2.2)
 
-Integrates: collectors, detection pipeline, watchdog, settings, audit logging.
+Integrates: collectors, pipeline, watchdog, settings, auth, intelligence.
 
 Run with:
     python -m sentinel
@@ -47,10 +47,12 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 60)
     audit("SYSTEM_START", f"{SYSTEM_NAME} v{SYSTEM_VERSION}")
 
-    # 1. Load config
+    # 1. Load config + auth
     from sentinel.core import settings as cfg
     cfg.load()
-    logger.info("✓ Config loaded")
+    from sentinel.core.auth import init_api_key
+    api_key = init_api_key()
+    logger.info(f"✓ Config loaded | API key: {api_key[:8]}…")
 
     # 2. Initialize database
     db.initialize()
@@ -165,6 +167,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# API key auth (added after CORS so CORS headers are set before auth check)
+from sentinel.core.auth import APIKeyMiddleware
+app.add_middleware(APIKeyMiddleware)
 
 # Routes
 app.include_router(analyze_router, tags=["Analysis"])

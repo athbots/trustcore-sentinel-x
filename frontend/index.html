@@ -25,10 +25,11 @@
     <div class="header-center">
       <span class="status-dot" id="systemStatusDot"></span>
       <span id="systemStatusLabel" class="status-label">CONNECTING…</span>
+      <span id="systemMode" class="system-mode mode-secure">SECURE</span>
     </div>
     <div class="header-right">
       <span class="uptime-label">Uptime: <span id="uptimeDisplay" class="mono">—</span></span>
-      <span class="version-tag">v1.0.0</span>
+      <span class="version-tag">v2.2.0</span>
     </div>
   </header>
 
@@ -37,7 +38,7 @@
 
     <!-- Risk Score Gauge -->
     <section class="card card-gauge" id="gaugeCard">
-      <h2 class="card-title">Risk Score</h2>
+      <h2 class="card-title">Risk Score <span class="confidence-tag" id="confidenceDisplay" style="opacity:0">0% confidence</span></h2>
       <div class="gauge-container">
         <svg class="gauge-svg" viewBox="0 0 200 120">
           <defs>
