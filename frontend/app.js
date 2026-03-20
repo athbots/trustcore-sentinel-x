@@ -1,92 +1,122 @@
 /**
- * TrustCore Sentinel X — Dashboard Logic
- * Connects to FastAPI backend, drives all UI updates.
+ * TrustCore Sentinel X — Dashboard v2
+ * Real-time updates via WebSocket (/ws/feed) with HTTP fallback polling.
  */
 
-const API = '';  // same origin — FastAPI serves this file
+const API = '';
+const WS_URL = `ws://${location.host}/ws/feed`;
 
-// ── State ─────────────────────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────────────────────
 let eventCount = 0;
-let lastRiskScore = 0;
+let ws = null;
+let wsConnected = false;
+let reconnectTimer = null;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-
-function now() {
-  return new Date().toLocaleTimeString('en-US', { hour12: false });
-}
+const now = () => new Date().toLocaleTimeString('en-US', { hour12: false });
 
 function colorForLevel(level) {
-  return { SAFE: '#30d158', LOW: '#00f5ff', MEDIUM: '#f5a623', HIGH: '#ff2d55', CRITICAL: '#ff2d55' }[level] || '#8891b4';
+  return { SAFE:'#30d158', LOW:'#00f5ff', MEDIUM:'#f5a623', HIGH:'#ff2d55', CRITICAL:'#ff2d55' }[level] || '#8891b4';
 }
-function classForLevel(level) {
-  return (level || 'safe').toLowerCase();
+function classForLevel(level) { return (level||'safe').toLowerCase(); }
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+function connectWS() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    wsConnected = true;
+    clearTimeout(reconnectTimer);
+    setStatus('online', 'LIVE');
+    console.log('[WS] Connected');
+    // heartbeat
+    setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.send('ping'); }, 20000);
+  };
+
+  ws.onmessage = (evt) => {
+    try {
+      const data = JSON.parse(evt.data);
+      if (data === 'pong') return;
+      updateUI(data, data.response?.event_type || 'LIVE');
+    } catch(e) { console.error('[WS] parse error', e); }
+  };
+
+  ws.onerror = () => { wsConnected = false; };
+
+  ws.onclose = () => {
+    wsConnected = false;
+    setStatus('error', 'RECONNECTING…');
+    reconnectTimer = setTimeout(connectWS, 3000);
+  };
+}
+
+// ── Status ─────────────────────────────────────────────────────────────────
+function setStatus(cls, label) {
+  const dot = $('systemStatusDot');
+  const lbl = $('systemStatusLabel');
+  dot.className = `status-dot ${cls}`;
+  lbl.textContent = label;
 }
 
 // ── Gauge ──────────────────────────────────────────────────────────────────
 function setGauge(score, level) {
-  const ARC_LEN = 251.2;   // full half-circle length (π × 80)
-  const fill = $('gaugeFill');
-  const needle = $('gaugeNeedle');
-  const scoreEl = $('gaugeScore');
-  const badge = $('threatBadge');
+  const ARC = 251.2;
+  $('gaugeFill').style.strokeDashoffset = ARC - (ARC * Math.min(score, 100) / 100);
+  $('gaugeNeedle').style.transform = `rotate(${-90 + (score/100)*180}deg)`;
+  $('gaugeScore').textContent = score;
 
-  // Arc fill (0→score%)
-  const offset = ARC_LEN - (ARC_LEN * Math.min(score, 100) / 100);
-  fill.style.strokeDashoffset = offset;
-
-  // Needle rotation: -90° (score=0) → +90° (score=100)
-  const deg = -90 + (score / 100) * 180;
-  needle.style.transform = `rotate(${deg}deg)`;
-
-  // Score text
-  scoreEl.textContent = score;
-
-  // Color
   const col = colorForLevel(level);
-  fill.style.stroke = `url(#gaugeGrad)`;   // keep gradient
-  needle.style.stroke = col;
-
-  // Badge
-  badge.textContent = level;
-  badge.className = `threat-badge badge-${classForLevel(level)}`;
+  $('gaugeNeedle').style.stroke = col;
+  $('threatBadge').textContent = level;
+  $('threatBadge').className = `threat-badge badge-${classForLevel(level)}`;
 }
 
-// ── Score Bars ─────────────────────────────────────────────────────────────
+// ── Bars ───────────────────────────────────────────────────────────────────
 function setBar(id, pct, color) {
-  const bar = $(id);
-  bar.style.width = `${Math.min(pct, 100)}%`;
-  bar.style.background = color;
+  const b = $(id);
+  b.style.width = `${Math.min(pct, 100)}%`;
+  b.style.background = color;
 }
-
 function setChip(id, text) {
-  const chip = $(id);
-  chip.textContent = text;
-  chip.className = `verdict-chip chip-${(text || '').toLowerCase().replace(/ /g, '_')}`;
+  const c = $(id);
+  c.textContent = text;
+  c.className = `verdict-chip chip-${(text||'').toLowerCase().replace(/ /g,'_')}`;
 }
 
 // ── Response Panel ─────────────────────────────────────────────────────────
-const RESPONSE_META = {
-  LOG:     { icon: '📋', color: 'log',     label: '✅ ACTION: LOG' },
-  ALERT:   { icon: '🔔', color: 'alert',   label: '🔔 ACTION: ALERT' },
-  BLOCK:   { icon: '🚫', color: 'block',   label: '🚫 ACTION: BLOCK' },
-  ISOLATE: { icon: '☢️', color: 'isolate', label: '☢️ ACTION: ISOLATE' },
+const RESP_META = {
+  LOG:     { icon:'📋', color:'log',     label:'✅ ACTION: LOG' },
+  ALERT:   { icon:'🔔', color:'alert',   label:'🔔 ACTION: ALERT' },
+  BLOCK:   { icon:'🚫', color:'block',   label:'🚫 ACTION: BLOCK' },
+  ISOLATE: { icon:'☢️', color:'isolate', label:'☢️ ACTION: ISOLATE' },
 };
 
-function updateResponsePanel(record) {
-  const meta = RESPONSE_META[record.action] || { icon: '⚡', color: 'log', label: record.action };
-  const panel = $('responsePanel');
-  panel.className = `response-active response-${meta.color}`;
-  $('responseIcon').textContent = meta.icon;
-  $('responseAction').textContent = meta.label;
-  $('responseDetail').textContent = record.outcome || record.description;
+function updateResponsePanel(rec) {
+  const m = RESP_META[rec.action] || { icon:'⚡', color:'log', label: rec.action };
+  const p = $('responsePanel');
+  p.className = `response-active response-${m.color}`;
+  $('responseIcon').textContent = m.icon;
+  $('responseAction').textContent = m.label;
+  $('responseDetail').textContent = rec.outcome || rec.description || '';
+}
+
+// ── Explanation Panel ──────────────────────────────────────────────────────
+function updateExplanation(expl) {
+  const box = $('explanationBox');
+  if (!expl || !expl.summary) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  $('explanationSummary').textContent = expl.summary;
+  $('explanationNarrative').textContent = expl.narrative || '';
+  $('explanationRec').textContent = expl.recommendation || '';
 }
 
 // ── Event Feed ─────────────────────────────────────────────────────────────
-function addEventToFeed(result, eventType) {
+function addToFeed(result, eventType) {
   const level = result.risk?.threat_level || 'SAFE';
   const score = result.risk?.risk_score ?? 0;
-  const text = result.phishing?.verdict || '—';
   const col = colorForLevel(level);
 
   eventCount++;
@@ -97,9 +127,7 @@ function addEventToFeed(result, eventType) {
   el.innerHTML = `
     <div class="event-meta">
       <span class="event-type" style="color:${col}">${eventType || 'EVENT'}</span>
-      <span class="event-text">${
-        (document.getElementById('inputText').value || '—').substring(0, 60)
-      }</span>
+      <span class="event-text">${(result.explanation?.summary || result.phishing?.verdict || '—').substring(0,70)}</span>
       <span class="event-time">${now()}</span>
     </div>
     <span class="event-score" style="color:${col}">${score}</span>
@@ -109,39 +137,37 @@ function addEventToFeed(result, eventType) {
 
   const feed = $('eventFeed');
   feed.insertBefore(el, feed.firstChild);
-  // cap at 50
-  while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+  while (feed.children.length > 10) feed.removeChild(feed.lastChild);
 }
 
 // ── Actions Log ────────────────────────────────────────────────────────────
-function addActionToLog(record) {
-  const meta = RESPONSE_META[record.action] || { icon: '⚡' };
+function addToLog(rec) {
+  const m = RESP_META[rec.action] || { icon:'⚡' };
   const el = document.createElement('div');
   el.className = 'action-item';
   el.innerHTML = `
     <div class="action-row">
-      <span class="action-icon">${meta.icon}</span>
-      <span class="action-name">${record.action}</span>
-      <span class="action-score-chip">${record.risk_score}/100</span>
+      <span class="action-icon">${m.icon}</span>
+      <span class="action-name">${rec.action}</span>
+      <span class="action-score-chip">${rec.risk_score}/100</span>
     </div>
-    <div class="action-detail">${record.outcome || record.description}</div>
-    <div class="action-time">${record.source_ip || '—'} → ${record.target || '—'} · ${now()}</div>
+    <div class="action-detail">${rec.outcome || rec.description || ''}</div>
+    <div class="action-time">${rec.source_ip||'—'} → ${rec.target||'—'} · ${now()}</div>
   `;
   const log = $('actionsLog');
   log.insertBefore(el, log.firstChild);
-  while (log.children.length > 50) log.removeChild(log.lastChild);
+  while (log.children.length > 20) log.removeChild(log.lastChild);
 }
 
 // ── Signals ────────────────────────────────────────────────────────────────
 function showSignals(signals) {
-  const box = $('signalsBox');
-  const list = $('signalsList');
-  if (!signals || signals.length === 0) { box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  list.innerHTML = signals.map(s => `<span class="signal-tag">▸ ${s}</span>`).join('');
+  const box = $('signalsBox'), list = $('signalsList');
+  if (!signals?.length) { box.style.display='none'; return; }
+  box.style.display='block';
+  list.innerHTML = signals.map(s=>`<span class="signal-tag">▸ ${s}</span>`).join('');
 }
 
-// ── Modal ───────────────────────────────────────────────────────────────────
+// ── Modal ──────────────────────────────────────────────────────────────────
 function showModal(data) {
   $('jsonContent').textContent = JSON.stringify(data, null, 2);
   $('jsonModal').classList.add('open');
@@ -154,35 +180,52 @@ function closeModal(e) {
   }
 }
 
-// ── Core: Send to /analyze ──────────────────────────────────────────────────
-async function callAnalyze(payload) {
-  const res = await fetch(`${API}/analyze`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+// ── Master UI update (called from WS or manual analyze) ───────────────────
+function updateUI(result, eventType) {
+  const risk  = result.risk  || {};
+  const phish = result.phishing || {};
+  const anom  = result.anomaly  || {};
+  const resp  = result.response || {};
+  const expl  = result.explanation || {};
+  const comp  = risk.component_scores || {};
+
+  setGauge(risk.risk_score ?? 0, risk.threat_level ?? 'SAFE');
+
+  // Score bars — support both old schema (phishing/anomaly/context) and new (network_anomaly)
+  setBar('barPhishing', comp.phishing ?? 0, '#ff2d55');
+  setBar('barAnomaly',  comp.network_anomaly ?? comp.anomaly ?? 0, '#f5a623');
+  setBar('barContext',  comp.context ?? 0, '#a259ff');
+  $('valPhishing').textContent = `${Math.round(comp.phishing ?? 0)}`;
+  $('valAnomaly').textContent  = `${Math.round(comp.network_anomaly ?? comp.anomaly ?? 0)}`;
+  $('valContext').textContent  = `${Math.round(comp.context ?? 0)}`;
+
+  setChip('chipPhishing', phish.verdict || '—');
+  setChip('chipAnomaly',  anom.verdict  || '—');
+
+  showSignals(phish.signals || []);
+
+  if (resp.action) { updateResponsePanel(resp); addToLog(resp); }
+  updateExplanation(expl);
+  addToFeed(result, eventType);
 }
 
-// ── UI Action: Analyze ──────────────────────────────────────────────────────
+// ── Manual Analyze ─────────────────────────────────────────────────────────
 async function runAnalysis() {
   const btn = $('btnAnalyze');
-  btn.disabled = true;
-  btn.textContent = 'Analyzing…';
-
+  btn.disabled = true; btn.textContent = 'Analyzing…';
   try {
-    const text = $('inputText').value.trim();
-    const rawF = $('inputFeatures').value;
-    const features = rawF.split(',').map(v => parseFloat(v.trim())).filter(n => !isNaN(n));
+    const text     = $('inputText').value.trim();
+    const features = $('inputFeatures').value.split(',').map(v=>parseFloat(v.trim())).filter(n=>!isNaN(n));
     const sourceIp = $('inputIP').value.trim() || undefined;
 
-    const payload = { text, features, source_ip: sourceIp };
-    const result = await callAnalyze(payload);
-
-    updateUI(result, payload.text ? 'MANUAL' : 'UNKNOWN');
+    const res = await fetch(`${API}/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, features, source_ip: sourceIp }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    updateUI(await res.json(), 'MANUAL');
   } catch(err) {
-    console.error(err);
     alert('Analysis failed: ' + err.message);
   } finally {
     btn.disabled = false;
@@ -190,28 +233,24 @@ async function runAnalysis() {
   }
 }
 
-// ── UI Action: Simulate Attack ─────────────────────────────────────────────
+// ── Simulate Attack ────────────────────────────────────────────────────────
 async function simulateAttack() {
   const btn = $('btnSimulate');
-  btn.disabled = true;
-  btn.textContent = 'Generating…';
-
+  btn.disabled = true; btn.textContent = 'Generating…';
   try {
-    // 1. Get a simulated attack event
-    const eventRes = await fetch(`${API}/simulate_attack`);
-    const attackEvent = await eventRes.json();
+    const ev = await (await fetch(`${API}/simulate_attack`)).json();
+    $('inputText').value = ev.text || '';
+    $('inputFeatures').value = (ev.features || []).join(', ');
+    $('inputIP').value = ev.source_ip || '';
 
-    // 2. Populate UI inputs for visibility
-    $('inputText').value = attackEvent.text || '';
-    $('inputFeatures').value = (attackEvent.features || []).join(', ');
-    $('inputIP').value = attackEvent.source_ip || '';
-
-    // 3. Analyze it
-    const result = await callAnalyze(attackEvent);
-
-    updateUI(result, attackEvent.event_type);
+    const res = await fetch(`${API}/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(ev),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    updateUI(await res.json(), ev.event_type);
   } catch(err) {
-    console.error(err);
     alert('Simulation failed: ' + err.message);
   } finally {
     btn.disabled = false;
@@ -219,68 +258,25 @@ async function simulateAttack() {
   }
 }
 
-// ── Update all UI panels ────────────────────────────────────────────────────
-function updateUI(result, eventType) {
-  const risk  = result.risk  || {};
-  const phish = result.phishing || {};
-  const anom  = result.anomaly  || {};
-  const resp  = result.response || {};
-
-  // Gauge
-  setGauge(risk.risk_score ?? 0, risk.threat_level ?? 'SAFE');
-
-  // Breakdown bars
-  const comp = risk.component_scores || {};
-  setBar('barPhishing', comp.phishing ?? 0, '#ff2d55');
-  setBar('barAnomaly',  comp.anomaly  ?? 0, '#f5a623');
-  setBar('barContext',  comp.context  ?? 0, '#a259ff');
-  $('valPhishing').textContent = `${(comp.phishing ?? 0).toFixed(0)}`;
-  $('valAnomaly').textContent  = `${(comp.anomaly  ?? 0).toFixed(0)}`;
-  $('valContext').textContent  = `${(comp.context  ?? 0).toFixed(0)}`;
-
-  setChip('chipPhishing', phish.verdict || '—');
-  setChip('chipAnomaly',  anom.verdict  || '—');
-
-  // Signals
-  showSignals(phish.signals || []);
-
-  // Response Panel
-  if (resp.action) updateResponsePanel(resp);
-
-  // Feed + Log
-  addEventToFeed(result, eventType);
-  if (resp.action) addActionToLog(resp);
-}
-
-// ── Status Polling ─────────────────────────────────────────────────────────
+// ── HTTP Status Polling (uptime + offline fallback) ────────────────────────
 async function pollStatus() {
   try {
-    const res = await fetch(`${API}/system_status`);
-    if (!res.ok) throw new Error('offline');
-    const data = await res.json();
-
-    // Uptime
+    const data = await (await fetch(`${API}/system_status`)).json();
     $('uptimeDisplay').textContent = data.uptime_human || '—';
+    if (!wsConnected) setStatus('online', 'HTTP POLL');
 
-    // System dot
-    const dot = $('systemStatusDot');
-    const lbl = $('systemStatusLabel');
-    dot.className = 'status-dot online';
-    lbl.textContent = 'OPERATIONAL';
-
-    // Populate actions log from history on first load
-    if (data.recent_actions && data.recent_actions.length && $('actionsLog').children.length === 0) {
-      data.recent_actions.slice().reverse().forEach(a => addActionToLog(a));
+    // Backfill actions log if empty
+    if (data.recent_actions?.length && $('actionsLog').children.length === 0) {
+      data.recent_actions.slice().reverse().forEach(a => addToLog(a));
     }
   } catch {
-    const dot = $('systemStatusDot');
-    const lbl = $('systemStatusLabel');
-    dot.className = 'status-dot error';
-    lbl.textContent = 'OFFLINE';
+    if (!wsConnected) setStatus('error', 'OFFLINE');
   }
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 setGauge(0, 'SAFE');
+$('explanationBox').style.display = 'none';
+connectWS();
 pollStatus();
-setInterval(pollStatus, 5000);
+setInterval(pollStatus, 10000);

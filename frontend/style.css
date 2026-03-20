@@ -73,16 +73,17 @@ body {
   max-width: 1400px;
   margin: 0 auto;
 }
-.card-gauge   { grid-column: 1; grid-row: 1; }
-.card-analyze { grid-column: 2; grid-row: 1; }
-.card-scores  { grid-column: 3; grid-row: 1; }
-.card-response{ grid-column: 1; grid-row: 2; }
-.card-feed    { grid-column: 2; grid-row: 2 / 4; }
-.card-actions { grid-column: 3; grid-row: 2 / 4; }
+.card-gauge      { grid-column: 1; grid-row: 1; }
+.card-analyze    { grid-column: 2; grid-row: 1; }
+.card-scores     { grid-column: 3; grid-row: 1; }
+.card-response   { grid-column: 1; grid-row: 2; }
+.card-explanation{ grid-column: 1; grid-row: 3; }
+.card-feed       { grid-column: 2; grid-row: 2 / 5; }
+.card-actions    { grid-column: 3; grid-row: 2 / 5; }
 
 @media (max-width: 1024px) {
   .grid { grid-template-columns: 1fr 1fr; }
-  .card-gauge, .card-analyze, .card-scores, .card-response { grid-column: auto; grid-row: auto; }
+  .card-gauge, .card-analyze, .card-scores, .card-response, .card-explanation { grid-column: auto; grid-row: auto; }
   .card-feed, .card-actions { grid-column: auto; grid-row: auto; }
 }
 @media (max-width: 640px) {
@@ -184,7 +185,7 @@ body {
 .response-log { background: rgba(0,245,255,0.05); border: 1px solid rgba(0,245,255,0.1); }
 .response-alert { background: rgba(245,166,35,0.07); border: 1px solid rgba(245,166,35,0.2); }
 .response-block { background: rgba(255,45,85,0.07); border: 1px solid rgba(255,45,85,0.2); }
-.response-isolate { background: rgba(255,45,85,0.12); border: 1px solid rgba(255,45,85,0.35); }
+.response-isolate { background: rgba(255,45,85,0.12); border: 1px solid rgba(255,45,85,0.35); animation: criticalPulse 0.8s infinite; }
 
 /* ── Event Feed ──────────────────────────────────────────────────────────── */
 .event-feed {
@@ -272,3 +273,24 @@ body {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Explanation Panel ────────────────────────────────────────────────── */
+.status-dot.live { background: #00f5ff; box-shadow: 0 0 6px #00f5ff; animation: pulse 1.5s infinite; }
+
+.expl-summary {
+  font-size: 0.85rem; font-weight: 700; color: var(--text-primary);
+  margin-bottom: 0.55rem; line-height: 1.4;
+}
+.expl-narrative {
+  font-size: 0.73rem; color: var(--text-secondary); line-height: 1.65;
+  padding: 0.55rem 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--cyan);
+  margin-bottom: 0.55rem;
+}
+.expl-rec {
+  font-size: 0.7rem; color: var(--orange);
+  font-style: italic; line-height: 1.5;
+}
+

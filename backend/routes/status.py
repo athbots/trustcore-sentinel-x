@@ -18,7 +18,9 @@ async def system_status():
     stats = get_action_stats()
     recent = get_recent_actions(limit=10)
 
-    return {
+    import state
+
+    response = {
         "system": SYSTEM_NAME,
         "version": SYSTEM_VERSION,
         "status": "OPERATIONAL",
@@ -27,6 +29,14 @@ async def system_status():
         "event_stats": stats,
         "recent_actions": recent,
     }
+
+    if state.last_result:
+        response["risk_score"] = state.last_result["risk"]["risk_score"]
+        response["threat_level"] = state.last_result["risk"]["threat_level"]
+        response["action"] = state.last_result["response"]["action"]
+        response["timestamp"] = state.last_result["timestamp"]
+
+    return response
 
 
 def _fmt_uptime(s: int) -> str:

@@ -1,0 +1,54 @@
+{
+  "name": "trustcore-sentinel-x",
+  "version": "2.0.0",
+  "description": "AI-powered autonomous cybersecurity assistant",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist:win": "electron-builder --win --x64",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.trustcore.sentinel-x",
+    "productName": "TrustCore Sentinel X",
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.js",
+      "icons/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../sentinel_backend.exe",
+        "to": "sentinel_backend.exe",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icons/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "icons/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "icons/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "keywords": ["cybersecurity", "ai", "threat-detection", "electron"],
+  "author": "TrustCore",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.0.0"
+  }
+}

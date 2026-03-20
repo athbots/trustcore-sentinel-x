@@ -292,66 +292,47 @@ uvicorn main:app --port 8000 --reload
 
 ## 🎯 Demo Experience
 
-### 1. Full pipeline demo (no server needed)
+### 1. Terminal Simulation (No Server Needed)
 
+Run the end-to-end pipeline against 10 realistic attack scenarios instantly:
 ```bash
 python -X utf8 scripts/simulate_attacks.py
 ```
 
-**Output:**
+### 2. Live API Demo (Requires Server)
 
-```
-══════════════════════════════════════════════════════════════════════
-  TrustCore Sentinel X -- Full Pipeline Simulation
-══════════════════════════════════════════════════════════════════════
-
-  [01] PayPal Phishing Email
-       Phishing  ████████████████████ 0.91  PHISHING
-       Anomaly   ████░░░░░░░░░░░░░░░░ 0.12  NORMAL
-       Risk       72/100  HIGH  ->  [BLOCK]  Source IP blocked, session terminated
-
-  [03] DDoS Flood Attack
-       Phishing  ░░░░░░░░░░░░░░░░░░░░ 0.01  LEGITIMATE
-       Anomaly   ████████████████████ 0.98  ANOMALY
-       Risk       95/100  CRITICAL  ->  [ISOLATE]  Host isolated, incident #INC-84729 created
-
-  [10] Normal Web Traffic (Baseline)
-       Phishing  ████░░░░░░░░░░░░░░░░ 0.22  LEGITIMATE
-       Anomaly   ████░░░░░░░░░░░░░░░░ 0.08  NORMAL
-       Risk        8/100  SAFE  ->  [LOG]  Event recorded in SIEM
-
-  SUMMARY
-  SAFE        1 event
-  HIGH        5 events
-  CRITICAL    4 events
-
-  Simulation complete. 10 scenarios processed.
-  Results saved -> data/simulation_results.json
-```
-
----
-
-### 2. Standalone model test
-
+Start the server:
 ```bash
-python -X utf8 models/phishing_model.py
+cd backend
+uvicorn main:app --port 8000 --reload
 ```
 
+**Test A: Normal Traffic (Expected: SAFE → LOG)**
+```bash
+curl -X POST http://127.0.0.1:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"Team standup at 10am tomorrow\", \"features\": [2000, 8, 0.45, 90, 0]}"
 ```
-============================================================
-  TrustCore Sentinel X -- Phishing Detection Model
-============================================================
-  Training samples : 48
-  CV-5 Accuracy    : 91.7% +/-5.6%
-  Heuristic rules  : 14
-============================================================
 
-  [PHISHING   ] Score=0.91 | Conf=HIGH   | PayPal Phishing
-  [PHISHING   ] Score=0.88 | Conf=HIGH   | CEO Fraud
-  [PHISHING   ] Score=0.86 | Conf=HIGH   | Microsoft Phishing
-  [LEGITIMATE ] Score=0.10 | Conf=HIGH   | Routine Email
-  [LEGITIMATE ] Score=0.08 | Conf=HIGH   | Order Confirm
-  [PHISHING   ] Score=0.93 | Conf=HIGH   | Gift Card Scam
+**Test B: Suspicious Phishing (Expected: MEDIUM → ALERT)**
+```bash
+curl -X POST http://127.0.0.1:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"Please review the attached invoice.\", \"features\": [4500, 3, 0.55, 240, 0], \"event_type\": \"PHISHING\"}"
+```
+
+**Test C: High-Risk Phishing (Expected: HIGH → BLOCK)**
+```bash
+curl -X POST http://127.0.0.1:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"Verify your PayPal account immediately or it will be suspended\", \"features\": [800, 12, 0.52, 45, 0], \"source_ip\": \"203.0.113.45\"}"
+```
+
+**Test D: Critical DDoS Anomaly (Expected: CRITICAL → ISOLATE)**
+```bash
+curl -X POST http://127.0.0.1:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d "{\"text\": \"\", \"features\": [150000, 1200, 0.35, 0.5, 1], \"source_ip\": \"198.51.100.12\", \"target\": \"api-server-prod\"}"
 ```
 
 ---

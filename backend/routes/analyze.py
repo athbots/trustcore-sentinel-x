@@ -75,4 +75,8 @@ async def analyze_event(req: EventRequest) -> dict:
     # Lazy import: guarantees sys.path is set before the controller loads its
     # own service imports (services.*, utils.*, config) — safe under --reload.
     from controllers.analysis_controller import run_full_analysis
-    return run_full_analysis(req.model_dump())
+    import state
+
+    result = run_full_analysis(req.model_dump())
+    state.last_result = result
+    return result
