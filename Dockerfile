@@ -32,6 +32,7 @@ WORKDIR /app
 # Copy virtual env from builder
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONPATH="/app"
 
 # Copy ALL application source packages
 COPY sentinel/   ./sentinel/
