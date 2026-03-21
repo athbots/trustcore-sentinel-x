@@ -195,10 +195,9 @@ else:
 
 
 # ── Health Check ─────────────────────────────────────────────────────────────
-@app.get("/health", tags=["System"], include_in_schema=True)
-async def health():
-    """Lightweight liveness probe — always returns 200 when the server is up."""
-    return {"status": "ok", "service": SYSTEM_NAME, "version": SYSTEM_VERSION}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 # ── CLI Entry Point ──────────────────────────────────────────────────────────
