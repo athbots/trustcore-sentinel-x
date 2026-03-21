@@ -45,6 +45,7 @@ ENV SENTINEL_DATA_DIR=/tmp/sentinel-data
 
 # Non-root user for security
 RUN addgroup --system sentinel && adduser --system --ingroup sentinel sentinel
+RUN mkdir -p /app/backend/logs && chown -R sentinel:sentinel /app
 USER sentinel
 
 # Expose application port
