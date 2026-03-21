@@ -7,7 +7,6 @@ Imported by both routes (HTTP boundary) and controllers (business logic).
 
 from pydantic import BaseModel, Field
 from typing import List, Optional, Any
-from datetime import datetime
 
 
 # ── Request Models ────────────────────────────────────────────────────────────

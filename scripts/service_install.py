@@ -14,7 +14,6 @@ Prerequisites:
     2. Place nssm.exe in this scripts/ directory or add to PATH
 """
 import sys
-import os
 import subprocess
 import shutil
 from pathlib import Path
@@ -75,8 +74,8 @@ def install_service():
     # Start it
     subprocess.run([nssm, "start", SERVICE_NAME])
 
-    print(f"\n✅ Service installed and started!")
-    print(f"   Dashboard: http://127.0.0.1:8321")
+    print("\n✅ Service installed and started!")
+    print("   Dashboard: http://127.0.0.1:8321")
     print(f"   Manage:    services.msc → {SERVICE_DISPLAY}")
 
 

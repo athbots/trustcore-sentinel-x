@@ -77,3 +77,9 @@ secrets.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# ── Config / Secrets ──────────────────────────────────────────────────────
+config.json
+
+# ── Simulation outputs ────────────────────────────────────────────────────
+data/simulation_results.json

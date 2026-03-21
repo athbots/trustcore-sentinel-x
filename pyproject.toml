@@ -1,0 +1,32 @@
+[tool.ruff]
+# Treat backend/ as a source root so bare imports (from config, from services.*)
+# resolve correctly for ruff static analysis.
+src = ["backend", "."]
+line-length = 120
+target-version = "py310"
+
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".git",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# E501: line too long — handled by line-length above
+# F401: unused import — allow in __init__.py (handled per-file below)
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+# Scripts use sys.path hacks intentionally
+"scripts/*" = ["E402"]
+# Test files use sys.path inserts
+"test_*.py" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]

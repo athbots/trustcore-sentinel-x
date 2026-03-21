@@ -6,15 +6,6 @@ Thin HTTP boundary that delegates to the analysis controller.
 Uses deferred (lazy) import of the controller to avoid import-order
 issues when uvicorn hot-reloads from the routes/ subdirectory.
 """
-import sys
-import os
-
-# Prepend backend root before anything else — must happen at module level
-# so subsequent imports in this file work correctly.
-_here = os.path.dirname(os.path.abspath(__file__))          # routes/
-_backend = os.path.dirname(_here)                           # backend/
-if _backend not in sys.path:
-    sys.path.insert(0, _backend)
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field

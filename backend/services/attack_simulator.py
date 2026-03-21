@@ -5,7 +5,6 @@ Generates realistic simulated cyber attack events for demo and testing.
 All events are 100% synthetic — no real network traffic is used.
 """
 import random
-import time
 from datetime import datetime, timezone
 
 # ── Attack templates ──────────────────────────────────────────────────────────

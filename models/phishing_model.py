@@ -21,8 +21,6 @@ Usage (import):
 """
 
 import re
-import sys
-import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline

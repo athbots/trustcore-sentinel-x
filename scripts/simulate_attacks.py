@@ -21,12 +21,13 @@ import json
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-# Allow running from project root
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Allow running from project root — add backend/ to sys.path
+_backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+sys.path.insert(0, _backend_dir)
 
-from services.phishing_service import analyze_phishing
-from services.anomaly_service import analyze_anomaly
-from services.risk_engine import compute_risk
+from services.phishing_service import analyze_phishing  # noqa: E402
+from services.anomaly_service import analyze_anomaly  # noqa: E402
+from services.risk_engine import compute_risk  # noqa: E402
 
 # ── ANSI Colors ───────────────────────────────────────────────────────────────
 class C:
@@ -169,6 +170,7 @@ def run_simulation():
 
     # Save results as JSON
     out_path = os.path.join(os.path.dirname(__file__), "..", "data", "simulation_results.json")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"  {C.DIM}Results saved → data/simulation_results.json{C.RESET}\n")

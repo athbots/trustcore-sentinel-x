@@ -16,7 +16,6 @@ The trained model and scaler are saved to models/ directory.
 """
 import argparse
 import sys
-import os
 import time
 import numpy as np
 import pandas as pd
@@ -126,7 +125,7 @@ def load_dataset(dataset: str, data_dir: str) -> pd.DataFrame:
     features = features.replace([np.inf, -np.inf], np.nan).dropna(subset=feature_cols)
     
     print(f"📊 Clean rows: {len(features):,}")
-    print(f"📊 Attack distribution:")
+    print("📊 Attack distribution:")
     print(features["label"].value_counts().head(10).to_string())
     
     return features
@@ -191,7 +190,7 @@ def train_model(features: pd.DataFrame) -> None:
     
     f1 = f1_score(y_true, y_pred_binary)
     print(f"F1 Score (Attack class): {f1:.4f}")
-    print(f"\nConfusion Matrix:")
+    print("\nConfusion Matrix:")
     cm = confusion_matrix(y_true, y_pred_binary)
     print(f"  TN={cm[0][0]:,}  FP={cm[0][1]:,}")
     print(f"  FN={cm[1][0]:,}  TP={cm[1][1]:,}")

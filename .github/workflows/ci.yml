@@ -28,19 +28,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio httpx ruff
+          pip install pytest ruff
 
       - name: Lint with ruff
-        run: ruff check backend/ models/ scripts/ --ignore E501
+        run: ruff check backend/ models/ scripts/
 
       - name: Run phishing model smoke test
-        run: python -m pytest tests/ -x -v 2>/dev/null || python models/phishing_model.py
+        run: python models/phishing_model.py
 
       - name: Run anomaly model smoke test
         run: python models/anomaly_model.py
 
       - name: Run simulation pipeline
         run: python -X utf8 scripts/simulate_attacks.py
+
+      - name: Run pytest suite
+        run: pytest tests/ -x -v
 
   docker:
     name: Docker Build

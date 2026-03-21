@@ -133,7 +133,7 @@ class AnomalyModel:
             "contamination":    CONTAMINATION,
             "training_samples": N_TRAIN,
             "features":         FEATURE_NAMES,
-            "score_range":      f"calibrated [0.0, 1.0]",
+            "score_range":      "calibrated [0.0, 1.0]",
         }
 
 

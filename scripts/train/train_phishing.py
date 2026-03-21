@@ -13,8 +13,6 @@ The trained pipeline is saved to models/ directory.
 """
 import argparse
 import sys
-import os
-import numpy as np
 import pandas as pd
 from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -51,7 +49,7 @@ def train_from_file(data_file: str, text_col: str, label_col: str) -> None:
     df = df.dropna(subset=[text_col, label_col])
 
     print(f"📊 Loaded {len(df):,} samples")
-    print(f"📊 Label distribution:")
+    print("📊 Label distribution:")
     print(df[label_col].value_counts().to_string())
 
     texts = df[text_col].tolist()
@@ -62,12 +60,12 @@ def train_from_file(data_file: str, text_col: str, label_col: str) -> None:
         labels = df[label_col].tolist()
     elif set(unique_labels) <= {"phishing", "legit", "legitimate", "ham", "spam"}:
         phishing_labels = {"phishing", "spam"}
-        labels = [1 if str(l).lower() in phishing_labels else 0 for l in df[label_col]]
+        labels = [1 if str(lbl).lower() in phishing_labels else 0 for lbl in df[label_col]]
     else:
         print(f"⚠ Unknown label values: {unique_labels}")
         print("  Assuming first unique value is legitimate (0), rest is phishing (1)")
         legit_label = unique_labels[0]
-        labels = [0 if l == legit_label else 1 for l in df[label_col]]
+        labels = [0 if lbl == legit_label else 1 for lbl in df[label_col]]
 
     print(f"   Phishing: {sum(labels)}, Legitimate: {len(labels) - sum(labels)}")
 
@@ -107,7 +105,7 @@ def _train_and_evaluate(texts: list[str], labels: list[int]) -> None:
     print(classification_report(labels, y_pred, target_names=["Legitimate", "Phishing"]))
 
     cm = confusion_matrix(labels, y_pred)
-    print(f"Confusion Matrix:")
+    print("Confusion Matrix:")
     print(f"  TN={cm[0][0]:,}  FP={cm[0][1]:,}")
     print(f"  FN={cm[1][0]:,}  TP={cm[1][1]:,}")
 
