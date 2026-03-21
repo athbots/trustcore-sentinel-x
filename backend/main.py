@@ -68,6 +68,12 @@ else:
         return {"message": f"{SYSTEM_NAME} v{SYSTEM_VERSION} — API is running. Visit /docs"}
 
 
+# ── Health Endpoint ───────────────────────────────────────────────────────────
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 # ── Startup ───────────────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def on_startup():
