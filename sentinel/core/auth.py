@@ -18,6 +18,7 @@ logger = get_logger("auth")
 # Routes that do NOT require authentication
 PUBLIC_PATHS = {
     "/", "/status", "/system_status", "/analyze", "/simulate_attack",
+    "/simulate_normal", "/health",
     "/docs", "/redoc", "/openapi.json",
     "/ws/feed", "/static",
 }

@@ -84,7 +84,7 @@ def explain(
     if process_result and process_result.get("score", 0) > 0.2:
         proc_signals = process_result.get("signals", [])
         parts.append(
-            f"Process anomaly detected: "
+            "Process anomaly detected: "
             + ". ".join(proc_signals[:2]) + "."
         )
 

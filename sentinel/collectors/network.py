@@ -11,7 +11,6 @@ import asyncio
 import math
 import time
 from collections import defaultdict
-from typing import Optional
 
 from sentinel.collectors.base import BaseCollector
 from sentinel.config import NETWORK_POLL_INTERVAL
@@ -105,7 +104,6 @@ class NetworkCollector(BaseCollector):
 
     def _start_sniffer(self) -> None:
         """Start scapy async sniffer in background."""
-        import threading
         try:
             from scapy.all import AsyncSniffer
             self._sniffer = AsyncSniffer(

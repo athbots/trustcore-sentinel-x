@@ -8,7 +8,6 @@ Feature schema (5 values):
     [bytes_per_second, request_rate, payload_entropy, session_duration, port_risk_score]
 """
 import numpy as np
-from pathlib import Path
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from typing import List

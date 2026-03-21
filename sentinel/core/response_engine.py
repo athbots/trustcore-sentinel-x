@@ -12,7 +12,6 @@ import os
 import sys
 import time
 import subprocess
-import platform
 from datetime import datetime, timezone
 
 from sentinel.utils.logger import get_logger

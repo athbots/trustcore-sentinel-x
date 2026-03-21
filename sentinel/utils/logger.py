@@ -11,7 +11,6 @@ import logging.handlers
 import json
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 
 from sentinel.config import LOG_DIR
 

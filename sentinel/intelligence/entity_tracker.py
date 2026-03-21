@@ -9,7 +9,6 @@ Thread-safe — called from both async pipeline and sync collectors.
 """
 import time
 import threading
-from collections import defaultdict
 from sentinel.utils.logger import get_logger
 
 logger = get_logger("intelligence.entity_tracker")

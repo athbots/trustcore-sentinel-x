@@ -194,6 +194,13 @@ else:
         return {"message": f"{SYSTEM_NAME} v{SYSTEM_VERSION} — API running. Visit /docs"}
 
 
+# ── Health Check ─────────────────────────────────────────────────────────────
+@app.get("/health", tags=["System"], include_in_schema=True)
+async def health():
+    """Lightweight liveness probe — always returns 200 when the server is up."""
+    return {"status": "ok", "service": SYSTEM_NAME, "version": SYSTEM_VERSION}
+
+
 # ── CLI Entry Point ──────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn

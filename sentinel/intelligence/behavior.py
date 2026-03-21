@@ -7,8 +7,6 @@ Builds entity baselines and detects deviations:
   - Behavioral shift scoring
 """
 import time
-import math
-from collections import defaultdict
 from sentinel.utils.logger import get_logger
 
 logger = get_logger("intelligence.behavior")

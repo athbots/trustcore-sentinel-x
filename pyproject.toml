@@ -25,6 +25,10 @@ ignore = ["E501"]
 "scripts/*" = ["E402"]
 # Test files use sys.path inserts
 "test_*.py" = ["E402"]
+# sentinel/app.py uses intentional late imports in lifespan context manager
+"sentinel/app.py" = ["E402"]
+# Collectors use conditional platform imports
+"sentinel/collectors/*.py" = ["E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

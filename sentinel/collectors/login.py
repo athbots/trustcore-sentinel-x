@@ -18,7 +18,6 @@ from collections import defaultdict
 
 from sentinel.collectors.base import BaseCollector
 from sentinel.config import LOGIN_POLL_INTERVAL
-from sentinel.utils.logger import get_logger
 
 # Brute-force thresholds
 BRUTE_FORCE_THRESHOLD = 5     # failures within window
@@ -69,7 +68,6 @@ class LoginCollector(BaseCollector):
 
         try:
             import win32evtlog
-            import win32evtlogutil
 
             server = None  # local machine
             log_type = "Security"
@@ -155,7 +153,6 @@ class LoginCollector(BaseCollector):
         """Parse /var/log/auth.log for login events."""
         events = []
         now = time.time()
-        import re
 
         auth_files = ["/var/log/auth.log", "/var/log/secure"]
         auth_file = None

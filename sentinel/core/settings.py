@@ -7,7 +7,6 @@ Supports runtime reload via API call or file-watch.
 Config file location: %LOCALAPPDATA%/TrustCoreSentinel/config.yaml (or ~/.sentinel/config.yaml)
 """
 import json
-from pathlib import Path
 from typing import Any
 
 from sentinel.config import APP_DATA_DIR

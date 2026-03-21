@@ -31,7 +31,7 @@ jobs:
           pip install pytest ruff
 
       - name: Lint with ruff
-        run: ruff check backend/ models/ scripts/
+        run: ruff check backend/ models/ scripts/ sentinel/
 
       - name: Run phishing model smoke test
         run: python models/phishing_model.py
@@ -57,9 +57,22 @@ jobs:
       - name: Build Docker image
         run: docker build -t trustcore/sentinel-x:ci .
 
-      - name: Verify image starts
+      - name: Verify image starts and /health responds
         run: |
           docker run -d --name sentinel-ci -p 8000:8000 trustcore/sentinel-x:ci
-          sleep 12
-          curl -f http://localhost:8000/system_status | python -m json.tool
+
+          # Wait for the app to be ready (ML warmup + DB init ~10-15s)
+          echo "Waiting for container to start..."
+          for i in $(seq 1 12); do
+            sleep 5
+            if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
+              echo "Container is ready!"
+              break
+            fi
+            echo "  Attempt $i/12 — still starting..."
+          done
+
+          # Final health check (fails CI if not ready)
+          curl -f http://localhost:8000/health | python -m json.tool
+
           docker stop sentinel-ci

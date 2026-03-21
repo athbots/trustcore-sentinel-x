@@ -32,7 +32,7 @@ def analyze_process(event: dict) -> dict:
         signals (list): human-readable signal descriptions
         explanation (str): narrative of what was detected
     """
-    event_type = event.get("event_type", "UNKNOWN")
+    _event_type = event.get("event_type", "UNKNOWN")  # kept for future scoring
     signals = event.get("signals", [])
     risk_hint = event.get("risk_hint", 0.1)
 

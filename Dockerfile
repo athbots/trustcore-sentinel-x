@@ -1,5 +1,5 @@
 # ── TrustCore Sentinel X — Dockerfile ────────────────────────────────────────
-# Multi-stage build: keeps the final image lean (~200MB vs ~800MB)
+# Multi-stage build: lean final image running the sentinel package
 
 # ── Stage 1: Builder ──────────────────────────────────────────────────────────
 FROM python:3.11-slim AS builder
@@ -33,12 +33,19 @@ WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy application source
-COPY backend/   ./backend/
-COPY frontend/  ./frontend/
+# Copy ALL application source packages
+COPY sentinel/   ./sentinel/
+COPY backend/    ./backend/
+COPY frontend/   ./frontend/
+COPY models/     ./models/
+COPY engine/     ./engine/
+COPY data/       ./data/
 
-# Create log directory
-RUN mkdir -p /app/logs
+# Create writable directories (logs, app config)
+RUN mkdir -p /app/logs /tmp/sentinel-data
+
+# Set env so sentinel config writes to a writable location (not /root)
+ENV SENTINEL_DATA_DIR=/tmp/sentinel-data
 
 # Non-root user for security
 RUN addgroup --system sentinel && adduser --system --ingroup sentinel sentinel
@@ -47,9 +54,9 @@ USER sentinel
 # Expose application port
 EXPOSE 8000
 
-# Health check — hits system_status every 30s
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/system_status')" || exit 1
+# Health check — lightweight /health endpoint
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-# Start the server
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Start the server — binds to all interfaces on port 8000
+CMD ["uvicorn", "sentinel.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
