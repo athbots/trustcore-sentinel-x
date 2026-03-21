@@ -7,6 +7,7 @@ on:
     branches: [main]
 
 env:
+  # Enforces Node 24 runtime to completely eliminate Node 20 deprecation warnings
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
@@ -16,6 +17,7 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.10", "3.11"]
+      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -33,19 +35,19 @@ jobs:
           pip install -r requirements.txt
           pip install pytest ruff
 
-      - name: Lint with ruff
+      - name: Lint with Ruff
         run: ruff check backend/ models/ scripts/ sentinel/
 
-      - name: Run phishing model smoke test
+      - name: Run Phishing Model Smoke Test
         run: python models/phishing_model.py
 
-      - name: Run anomaly model smoke test
+      - name: Run Anomaly Model Smoke Test
         run: python models/anomaly_model.py
 
-      - name: Run simulation pipeline
+      - name: Run Simulation Pipeline
         run: python -X utf8 scripts/simulate_attacks.py
 
-      - name: Run pytest suite
+      - name: Run Pytest Suite
         run: pytest tests/ -x -v
 
   docker:
@@ -57,7 +59,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Build Docker Image
         run: docker build -t trustcore/sentinel-x:ci .
 
       - name: Verify image starts and /health responds
