@@ -32,15 +32,10 @@ WORKDIR /app
 # Copy virtual env from builder
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-ENV PYTHONPATH="/app"
+ENV PYTHONPATH=/app
 
 # Copy ALL application source packages
-COPY sentinel/   ./sentinel/
-COPY backend/    ./backend/
-COPY frontend/   ./frontend/
-COPY models/     ./models/
-COPY engine/     ./engine/
-COPY data/       ./data/
+COPY . .
 
 # Create writable directories (logs, app config)
 RUN mkdir -p /app/logs /tmp/sentinel-data
@@ -60,4 +55,4 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
 # Start the server — binds to all interfaces on port 8000
-CMD ["uvicorn", "sentinel.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
