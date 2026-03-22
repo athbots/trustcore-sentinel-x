@@ -1,6 +1,13 @@
 """
 TrustCore Sentinel X — Centralized Configuration
 """
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Secure API Key configuration
+API_KEY = os.getenv("TRUSTCORE_API_KEY", "default-dev-key")
 
 # Risk thresholds (0–100 scale)
 RISK_LOW_THRESHOLD = 35

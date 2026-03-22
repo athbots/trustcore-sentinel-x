@@ -189,7 +189,7 @@ def run():
             time.sleep(0.5)
 
             try:
-                r = requests.post(f"{API}/analyze", json=event, timeout=10)
+                r = requests.post(f"{API}/analyze", json=event, headers={"X-API-Key": "trustcore-super-secret-key-2026"}, timeout=10)
                 result = r.json()
                 print(f"{C['g']}Done.{C['0']}")
                 time.sleep(0.3)

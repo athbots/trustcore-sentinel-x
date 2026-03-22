@@ -11,7 +11,7 @@ from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from typing import List
 
-from config import ANOMALY_CONTAMINATION, ANOMALY_TRAINING_SAMPLES
+from infra.config import ANOMALY_CONTAMINATION, ANOMALY_TRAINING_SAMPLES
 
 # ---------------------------------------------------------------------------
 # Feature schema (order matters):

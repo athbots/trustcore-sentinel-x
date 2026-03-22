@@ -1,0 +1,72 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.17
+collected 24 items
+
+tests\test_analysis.py ....                                              [ 16%]
+tests\test_api.py .....                                                  [ 37%]
+tests\test_models.py .............                                       [ 91%]
+tests\test_risk.py .F                                                    [100%]
+
+================================== FAILURES ===================================
+_____________________ test_risk_engine_weighting_critical _____________________
+
+    def test_risk_engine_weighting_critical():
+        """Assert high probability models correctly trigger CRITICAL scalar logic."""
+        event_data = {
+            "text": "paypal urgently verify",
+            "features": [50000, 1000, 0.95, 3600, 1],
+            "source_ip": "192.168.1.100",
+            "repeat_offender": True
+        }
+    
+        phishing_result = 0.95
+        anomaly_result = 0.95
+    
+        risk_output = compute_risk(phishing_result, anomaly_result, event_data)
+    
+        assert risk_output["risk_score"] > 75
+>       assert risk_output["threat_level"] == "CRITICAL"
+E       AssertionError: assert 'HIGH' == 'CRITICAL'
+E         
+E         - CRITICAL
+E         + HIGH
+
+tests\test_risk.py:37: AssertionError
+============================== warnings summary ===============================
+backend\main.py:91
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\main.py:91: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495
+  C:\Users\aniru\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\api\routes\analyze.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    result["timestamp"] = datetime.utcnow().isoformat() + "Z"
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\infra\audit_logger.py:15: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_risk.py::test_risk_engine_weighting_critical - AssertionErr...
+================== 1 failed, 23 passed, 8 warnings in 2.19s ===================

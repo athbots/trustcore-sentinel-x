@@ -19,7 +19,7 @@ from services.response_engine        import execute_response
 from services.explainability_engine  import generate_explanation
 from services.attack_chain_tracker   import track_event
 from services.entity_tracker         import track_entity
-from utils.logger                    import get_logger
+from infra.logger                    import get_logger
 
 logger = get_logger("controller.analysis")
 

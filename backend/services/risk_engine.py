@@ -9,7 +9,7 @@ Weights (configurable in config.py):
   - Anomaly:   40%
   - Context:   20%
 """
-from config import (
+from infra.config import (
     WEIGHT_PHISHING, WEIGHT_ANOMALY, WEIGHT_CONTEXT,
     RISK_LOW_THRESHOLD, RISK_MEDIUM_THRESHOLD, RISK_CRITICAL_THRESHOLD,
     RESPONSE_RULES,

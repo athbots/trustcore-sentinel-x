@@ -19,7 +19,7 @@ def analyze_event(payload, event_title):
     print(json.dumps(payload, indent=2))
     
     try:
-        resp = requests.post(API_URL, json=payload, timeout=5)
+        resp = requests.post(API_URL, json=payload, headers={"X-API-Key": "trustcore-super-secret-key-2026"}, timeout=5)
         resp.raise_for_status()
         data = resp.json()
         

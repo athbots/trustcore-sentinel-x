@@ -83,3 +83,8 @@ config.json
 
 # ── Simulation outputs ────────────────────────────────────────────────────
 data/simulation_results.json
+
+# ── EDR Security Offline Assets ───────────────────────────────────────────
+backend/.env
+release/
+sentinel.spec

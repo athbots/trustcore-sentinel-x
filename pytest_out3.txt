@@ -1,0 +1,167 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.17
+collected 24 items
+
+tests\test_analysis.py FFFF                                              [ 16%]
+tests\test_api.py F..F.                                                  [ 37%]
+tests\test_models.py .............                                       [ 91%]
+tests\test_risk.py .F                                                    [100%]
+
+================================== FAILURES ===================================
+________________________ test_phishing_detection_clean ________________________
+
+    def test_phishing_detection_clean():
+        """Verify clean benign text is classified safely with low probability."""
+        text = "Hey team, this is the agenda for the weekly all-hands meeting. See you there!"
+        result = analyze_phishing(text)
+    
+>       assert result["verdict"] == "CLEAN"
+E       AssertionError: assert 'LEGITIMATE' == 'CLEAN'
+E         
+E         - CLEAN
+E         + LEGITIMATE
+
+tests\test_analysis.py:10: AssertionError
+______________________ test_phishing_detection_malicious ______________________
+
+    def test_phishing_detection_malicious():
+        """Verify explicit credential harvesting indicators trigger HIGH probability and signals."""
+        text = "URGENT: Your PayPal account has been compromised. Please verify your billing details immediately by clicking here."
+        result = analyze_phishing(text)
+    
+        assert result["verdict"] == "PHISHING"
+>       assert result["probability"] > 0.60
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'probability'
+
+tests\test_analysis.py:20: KeyError
+________________________ test_anomaly_detection_normal ________________________
+
+    def test_anomaly_detection_normal():
+        """Verify baseline network behavior maps to CLEAN anomaly verdicts."""
+        # [bytes_per_sec, req_rate, entropy, duration, port_risk]
+        normal_vector = [500.0, 10.0, 0.4, 60.0, 0.0]
+        result = analyze_anomaly(normal_vector)
+    
+>       assert result["verdict"] == "CLEAN"
+E       AssertionError: assert 'NORMAL' == 'CLEAN'
+E         
+E         - CLEAN
+E         + NORMAL
+
+tests\test_analysis.py:29: AssertionError
+_______________________ test_anomaly_detection_outlier ________________________
+
+    def test_anomaly_detection_outlier():
+        """Verify massive data spikes map to ANOMALOUS network verdicts."""
+        ddos_vector = [50000.0, 1000.0, 0.95, 3600.0, 1.0]
+        result = analyze_anomaly(ddos_vector)
+    
+>       assert result["verdict"] == "ANOMALOUS"
+E       AssertionError: assert 'ANOMALY' == 'ANOMALOUS'
+E         
+E         - ANOMALOUS
+E         ?       ^^^
+E         + ANOMALY
+E         ?       ^
+
+tests\test_analysis.py:37: AssertionError
+_______________________ test_missing_api_key_rejection ________________________
+
+    def test_missing_api_key_rejection():
+        """Verify endpoints block requests lacking the explicit API signature."""
+        response = client.get("/system_status")
+        assert response.status_code == 403
+>       assert "Forbidden" in response.text
+E       assert 'Forbidden' in '{"detail":"Not authenticated"}'
+E        +  where '{"detail":"Not authenticated"}' = <Response [403 Forbidden]>.text
+
+tests\test_api.py:13: AssertionError
+___________________________ test_consistency_check ____________________________
+
+    def test_consistency_check():
+        """Verify passing the exact same deterministic payload twice yields symmetric risk analysis."""
+        payload = {
+            "text": "This is a benign clean data vector.",
+            "features": [500, 10, 0.45, 60, 0],
+            "source_ip": "10.0.0.5"
+        }
+    
+        response_1 = client.post("/analyze", json=payload, headers=HEADERS).json()
+        response_2 = client.post("/analyze", json=payload, headers=HEADERS).json()
+    
+        # Asserting symmetrical outcome scoring
+        assert response_1["risk_score"] == response_2["risk_score"]
+>       assert response_1["phishing"]["probability"] == response_2["phishing"]["probability"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'probability'
+
+tests\test_api.py:52: KeyError
+---------------------------- Captured stderr call -----------------------------
+2026-03-23 00:02:46 | INFO     | response_engine | \U0001f4cb ACTION=LOG | THREAT=LOW | RISK=31/100 | SRC=10.0.0.5 | TGT=None | Event recorded in SIEM. Risk 31/100 \u2014 monitoring continues.\n2026-03-23 00:02:46 | INFO     | controller.analysis | ANALYSIS COMPLETE | risk=31/100 | level=LOW | action=LOG | entity=10.0.0.5 (x1.00) | chain=NO\n2026-03-23 00:02:46 | INFO     | response_engine | \U0001f4cb ACTION=LOG | THREAT=LOW | RISK=31/100 | SRC=10.0.0.5 | TGT=None | Event recorded in SIEM. Risk 31/100 \u2014 monitoring continues.\n2026-03-23 00:02:46 | INFO     | controller.analysis | ANALYSIS COMPLETE | risk=31/100 | level=LOW | action=LOG | entity=10.0.0.5 (x1.00) | chain=NO
+------------------------------ Captured log call ------------------------------
+INFO     response_engine:response_engine.py:71 \U0001f4cb ACTION=LOG | THREAT=LOW | RISK=31/100 | SRC=10.0.0.5 | TGT=None | Event recorded in SIEM. Risk 31/100 \u2014 monitoring continues.\nINFO     controller.analysis:analysis_service.py:99 ANALYSIS COMPLETE | risk=31/100 | level=LOW | action=LOG | entity=10.0.0.5 (x1.00) | chain=NO\nINFO     response_engine:response_engine.py:71 \U0001f4cb ACTION=LOG | THREAT=LOW | RISK=31/100 | SRC=10.0.0.5 | TGT=None | Event recorded in SIEM. Risk 31/100 \u2014 monitoring continues.\nINFO     controller.analysis:analysis_service.py:99 ANALYSIS COMPLETE | risk=31/100 | level=LOW | action=LOG | entity=10.0.0.5 (x1.00) | chain=NO
+_____________________ test_risk_engine_weighting_critical _____________________
+
+    def test_risk_engine_weighting_critical():
+        """Assert high probability models correctly trigger CRITICAL scalar logic."""
+        event_data = {
+            "text": "paypal urgently verify",
+            "features": [50000, 1000, 0.95, 3600, 1],
+            "source_ip": "192.168.1.100",
+            "repeat_offender": True
+        }
+    
+        phishing_result = 0.95
+        anomaly_result = 0.95
+    
+        risk_output = compute_risk(phishing_result, anomaly_result, event_data)
+    
+>       assert risk_output["risk_score"] > 85
+E       assert 81 > 85
+
+tests\test_risk.py:36: AssertionError
+============================== warnings summary ===============================
+backend\main.py:91
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\main.py:91: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495
+  C:\Users\aniru\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\api\routes\analyze.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    result["timestamp"] = datetime.utcnow().isoformat() + "Z"
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\infra\audit_logger.py:15: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_analysis.py::test_phishing_detection_clean - AssertionError...
+FAILED tests/test_analysis.py::test_phishing_detection_malicious - KeyError: ...
+FAILED tests/test_analysis.py::test_anomaly_detection_normal - AssertionError...
+FAILED tests/test_analysis.py::test_anomaly_detection_outlier - AssertionErro...
+FAILED tests/test_api.py::test_missing_api_key_rejection - assert 'Forbidden'...
+FAILED tests/test_api.py::test_consistency_check - KeyError: 'probability'
+FAILED tests/test_risk.py::test_risk_engine_weighting_critical - assert 81 > 85
+================== 7 failed, 17 passed, 8 warnings in 2.52s ===================

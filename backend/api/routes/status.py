@@ -3,15 +3,16 @@ TrustCore Sentinel X — System Status Route
 GET /system_status
 """
 import time
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from services.response_engine import get_recent_actions, get_action_stats
-from config import SYSTEM_NAME, SYSTEM_VERSION
+from infra.config import SYSTEM_NAME, SYSTEM_VERSION
+from infra.security import verify_api_key, rate_limit
 
 router = APIRouter()
 _START_TIME = time.time()
 
 
-@router.get("/system_status")
+@router.get("/system_status", dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 async def system_status():
     """Return live system uptime, event counts, and recent response actions."""
     uptime_seconds = int(time.time() - _START_TIME)

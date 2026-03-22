@@ -19,11 +19,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.analyze import router as analyze_router
-from routes.simulate import router as simulate_router
-from routes.status import router as status_router
-from utils.logger import get_logger
-from config import SYSTEM_NAME, SYSTEM_VERSION
+from api.routes.analyze import router as analyze_router
+from api.routes.simulate import router as simulate_router
+from api.routes.status import router as status_router
+from infra.logger import get_logger
+from infra.config import SYSTEM_NAME, SYSTEM_VERSION
 
 logger = get_logger("main")
 
@@ -72,6 +72,19 @@ else:
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# ── Metrics Endpoint ──────────────────────────────────────────────────────────
+@app.get("/metrics")
+def get_metrics():
+    """Return the latest measurable AI performance metrics."""
+    results_path = os.path.join(os.path.dirname(__file__), "..", "evaluation", "results.json")
+    try:
+        import json
+        with open(results_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        return {"error": "Metrics not generated yet. Run evaluation/evaluate_models.py"}
 
 
 # ── Startup ───────────────────────────────────────────────────────────────────

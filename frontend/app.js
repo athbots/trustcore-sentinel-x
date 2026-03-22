@@ -4,6 +4,7 @@
  */
 
 const API = '';
+const API_KEY = 'trustcore-super-secret-key-2026';
 const WS_URL = `ws://${location.host}/ws/feed`;
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -267,14 +268,14 @@ async function simulateAttack() {
   const btn = $('btnSimulate');
   btn.disabled = true; btn.textContent = 'Generating…';
   try {
-    const ev = await (await fetch(`${API}/simulate_attack`)).json();
+    const ev = await (await fetch(`${API}/simulate_attack`, { headers: { 'X-API-Key': API_KEY } })).json();
     $('inputText').value = ev.text || '';
     $('inputFeatures').value = (ev.features || []).join(', ');
     $('inputIP').value = ev.source_ip || '';
 
     const res = await fetch(`${API}/analyze`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
       body: JSON.stringify(ev),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

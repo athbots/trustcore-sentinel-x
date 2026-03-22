@@ -57,6 +57,16 @@ Event → Phishing NLP → Anomaly IF → Risk Scoring → Explainability
 
 ---
 
+## 🔐 Production-Grade Security Features
+
+TrustCore Sentinel X is hardened with enterprise-ready API boundaries:
+- **API Key Authentication**: All REST endpoints (`/analyze`, `/simulate`, `/status`) are strictly guarded by mandatory `X-API-Key` headers.
+- **IP Rate Limiting**: Embedded middleware dynamically tracking request frequency windows, rejecting abusive traffic bursts with HTTP 429 schema codes.
+- **Strict Input Validation**: Payloads are processed through Pydantic `@field_validator` models, automatically sanitizing hidden null bytes and rejecting malformed injections.
+- **Structured Audit Logging**: Every transaction, processing timing delay (ms), request UUID, and autonomous action taken is globally serialized into machine-readable JSON sinks at `backend/logs/audit.json` for external SIEM ingestion.
+
+---
+
 ## 📊 Datasets
 
 ### `data/phishing_dataset.json`
@@ -64,6 +74,59 @@ Labeled email samples: benign communications vs. phishing lures (fake billing, p
 
 ### `data/network_dataset.json`
 UNSW-NB15-style traffic vectors (`bytes_sent`, `bytes_received`, `duration`, `failed_logins`, `packet_count`, `port`). Normal flows (label=0) train the Isolation Forest baseline.
+
+---
+
+## 📊 Model Performance
+
+Our Evidence & Evaluation Layer runs an 80/20 train/test data split to automatically measure model performance against the ground-truth datasets. These are not simulated numbers—they are actual classification metrics calculated from the embedded datasets (`evaluation/evaluate_models.py`).
+
+**Phishing NLP Pipeline (TF-IDF + LR)**
+* **Accuracy:** 75.0%
+* **Precision:** 0.67
+* **Recall:** 1.00
+* **F1-Score:** 0.80
+
+**Network Anomaly Detection (Isolation Forest)**
+* **Detection Rate:** 14.3%
+* **False Positive Rate:** 0.0%
+
+> *Live metrics can be requested from the API at `/metrics`.*
+
+---
+
+## 🧪 Testing & Validation
+
+Our Quality Assurance pipelines execute deterministic validation to lock AI outputs safely against deployment regressions. The system relies on **Pytest** ensuring consistent, resilient security schemas.
+
+### What is covered?
+- **ML Unit Tests**: Directly asserting both `Isolation Forest` vector scales and `TF-IDF / Logistic Regression` probability bounds.
+- **REST API Boundaries**: Validating required `X-API-Key` interceptors (`HTTP 403`), and `FastAPI` IP traffic limiters (`HTTP 429` blockings) under DDoS polling thresholds.
+- **Explainability Consistency**: Ensuring non-deterministic ML shifts do not occur if static strings execute identical event pipelines back-to-back.
+
+### Running Validations Natively
+```bash
+# Execute local unit, integration, and ML consistency checks
+pytest tests/ -v
+```
+All pull requests automatically trigger the GitHub CI pipelines enforcing zero QA failures before release.
+
+## 🚀 Installation
+
+TrustCore Sentinel X now ships as a pre-compiled native executable. The entire AI backend configuration configures out-of-the-box dynamically on the first cold boot.
+
+**1. Download the Package**
+Ensure you pull the complete repository structure containing the pre-packaged `dist/` binary and dataset caches natively.
+
+**2. Boot the Executable**
+Execute the root deployment wrapper automating system checks and API integrations:
+```bash
+start.bat
+```
+*(Alternatively, execute the CLI binary manually: `dist\sentinel.exe run`)*
+
+**3. Open the Dashboard**
+The system orchestrator natively mounts the ML backend services and autonomously pops your default browser to access the security operations window automatically at `http://127.0.0.1:8000`.
 
 ---
 
@@ -86,6 +149,22 @@ The simulation runs a multi-stage attack from a single attacker IP, demonstratin
 - Correlates events into a kill chain
 - Escalates the entity's risk multiplier with each offense
 - Provides detailed explainability at every stage
+
+---
+
+## 🧪 Attack Simulation Lab
+
+To prove the system natively correlates multi-stage logic and generates intelligence across diverse attacks, a dedicated attack lab is provided. It feeds sequential, real-world attack vectors directly into the backend.
+
+```bash
+python simulation/attack_scenarios.py
+```
+
+**Available Scenarios:**
+1. **Targeted Phishing Attack:** Simulated delivery of credential harvesting emails followed by an anomalous VPN login attempt from the same actor.
+2. **Brute Force Spike:** External SSH flooding causing aggressive metric spikes detected by the Isolation Forest model.
+3. **Data Exfiltration:** High-volume anomalous outbound network streams from a compromised internal host.
+4. **Multi-Stage APT (Advanced Persistent Threat):** A chained sequence simulating a full compromise: Phishing → Credential Abuse → Internal Movement → Data Exfiltration. Tracks entity escalation and kill-chain logic.
 
 ---
 

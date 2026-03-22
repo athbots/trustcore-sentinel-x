@@ -6,7 +6,7 @@ All actions are SIMULATED — no real network changes are made.
 """
 import time
 from datetime import datetime, timezone
-from utils.logger import get_logger
+from infra.logger import get_logger
 
 logger = get_logger("response_engine")
 
