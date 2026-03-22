@@ -1,5 +1,4 @@
 import requests
-import time
 
 BASE_URL = "http://localhost:8000"
 API_KEY = "trustcore-super-secret-key-2026"
