@@ -1,4 +1,3 @@
-import pytest
 from backend.services.risk_engine import compute_risk
 
 def test_risk_engine_weighting_low():

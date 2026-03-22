@@ -1,4 +1,3 @@
-import pytest
 from backend.services.phishing_service import analyze_phishing
 from backend.services.anomaly_service import analyze_anomaly
 

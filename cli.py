@@ -71,9 +71,8 @@ def print_banner():
 def check_python_dependencies():
     """Ensure host dependencies exist if executing natively through interpreter."""
     try:
-        import fastapi
-        import uvicorn
-        import sklearn
+        import requests
+        _ = requests.__version__
     except ImportError:
         print(f"{Fore.RED}ERROR: Core AI/API dependencies are missing. Run `pip install -r requirements.txt`{Style.RESET_ALL}")
         sys.exit(1)

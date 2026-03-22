@@ -5,13 +5,9 @@
 
 const API = '';
 const API_KEY = 'trustcore-super-secret-key-2026';
-const WS_URL = `ws://${location.host}/ws/feed`;
 
 // ── State ──────────────────────────────────────────────────────────────────
 let eventCount = 0;
-let ws = null;
-let wsConnected = false;
-let reconnectTimer = null;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -22,37 +18,6 @@ function colorForLevel(level) {
 }
 function classForLevel(level) { return (level||'safe').toLowerCase(); }
 
-// ── WebSocket ──────────────────────────────────────────────────────────────
-function connectWS() {
-  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
-
-  ws = new WebSocket(WS_URL);
-
-  ws.onopen = () => {
-    wsConnected = true;
-    clearTimeout(reconnectTimer);
-    setStatus('online', 'LIVE');
-    console.log('[WS] Connected');
-    // heartbeat
-    setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.send('ping'); }, 20000);
-  };
-
-  ws.onmessage = (evt) => {
-    try {
-      const data = JSON.parse(evt.data);
-      if (data === 'pong') return;
-      updateUI(data, data.response?.event_type || 'LIVE');
-    } catch(e) { console.error('[WS] parse error', e); }
-  };
-
-  ws.onerror = () => { wsConnected = false; };
-
-  ws.onclose = () => {
-    wsConnected = false;
-    setStatus('error', 'RECONNECTING…');
-    reconnectTimer = setTimeout(connectWS, 3000);
-  };
-}
 
 // ── Status ─────────────────────────────────────────────────────────────────
 function setStatus(cls, label) {
@@ -293,20 +258,19 @@ async function pollStatus() {
   try {
     const data = await (await fetch(`${API}/system_status`)).json();
     $('uptimeDisplay').textContent = data.uptime_human || '—';
-    if (!wsConnected) setStatus('online', 'HTTP POLL');
+    setStatus('online', 'LIVE');
 
     // Backfill actions log if empty
     if (data.recent_actions?.length && $('actionsLog').children.length === 0) {
       data.recent_actions.slice().reverse().forEach(a => addToLog(a));
     }
   } catch {
-    if (!wsConnected) setStatus('error', 'OFFLINE');
+    setStatus('error', 'OFFLINE');
   }
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 setGauge(0, 'SAFE');
 $('explanationBox').style.display = 'none';
-connectWS();
 pollStatus();
 setInterval(pollStatus, 10000);

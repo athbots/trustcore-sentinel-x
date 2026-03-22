@@ -1,0 +1,75 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\aniru\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.17
+collecting ... collected 18 items
+
+tests/test_analysis.py::test_phishing_detection_clean PASSED             [  5%]
+tests/test_analysis.py::test_phishing_detection_malicious PASSED         [ 11%]
+tests/test_analysis.py::test_anomaly_detection_normal PASSED             [ 16%]
+tests/test_analysis.py::test_anomaly_detection_outlier PASSED            [ 22%]
+tests/test_api.py::test_missing_api_key_rejection PASSED                 [ 27%]
+tests/test_api.py::test_input_validation_failure PASSED                  [ 33%]
+tests/test_api.py::test_analyze_attack_simulation PASSED                 [ 38%]
+tests/test_api.py::test_consistency_check PASSED                         [ 44%]
+tests/test_api.py::test_rate_limiter_overflow PASSED                     [ 50%]
+tests/test_models.py::test_phishing_service_loads PASSED                 [ 55%]
+tests/test_models.py::test_detects_phishing_indicator PASSED             [ 61%]
+tests/test_models.py::test_detects_legitimate_indicator PASSED           [ 66%]
+tests/test_models.py::test_anomaly_service_loads PASSED                  [ 72%]
+tests/test_models.py::test_normal_traffic_behavior PASSED                [ 77%]
+tests/test_models.py::test_ddos_attack_behavior PASSED                   [ 83%]
+tests/test_models.py::test_risk_scoring_matrix FAILED                    [ 88%]
+
+================================== FAILURES ===================================
+__________________________ test_risk_scoring_matrix ___________________________
+
+    def test_risk_scoring_matrix():
+        """Verify the risk engine integrates ML outcomes into a final threat score."""
+        # Simulate a suspicious phishing email + suspicious network anomaly
+        result = compute_risk(0.5, 0.45, {"source_ip": "10.0.0.1"})
+    
+        assert "risk_score" in result
+        assert "threat_level" in result
+>       assert "recommended_action" in result
+E       AssertionError: assert 'recommended_action' in {'component_scores': {'anomaly': 45.0, 'context': 30.0, 'phishing': 50.0}, 'response': {'action': 'ALERT', 'description': 'Security team notified'}, 'risk_score': 44, 'threat_level': 'MEDIUM'}
+
+tests\test_models.py:73: AssertionError
+============================== warnings summary ===============================
+backend\main.py:91
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\main.py:91: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495
+  C:\Users\aniru\AppData\Local\Programs\Python\Python312\Lib\site-packages\fastapi\applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\api\routes\analyze.py:43: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    result["timestamp"] = datetime.utcnow().isoformat() + "Z"
+
+tests/test_api.py::test_analyze_attack_simulation
+tests/test_api.py::test_consistency_check
+tests/test_api.py::test_consistency_check
+  C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x\backend\infra\audit_logger.py:12: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "timestamp": datetime.utcnow().isoformat() + "Z",
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_models.py::test_risk_scoring_matrix - AssertionError: asser...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+================== 1 failed, 15 passed, 8 warnings in 1.52s ===================

@@ -2,10 +2,10 @@ import json
 import os
 from typing import List, Dict
 
-# Resolve absolute paths relative to this script's directory
-DATA_DIR = os.path.dirname(os.path.abspath(__file__))
-PHISHING_PATH = os.path.join(DATA_DIR, "phishing_dataset.json")
-NETWORK_PATH = os.path.join(DATA_DIR, "network_dataset.json")
+# Resolve absolute paths relative to project root
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PHISHING_PATH = os.path.join(PROJECT_ROOT, "data", "phishing_dataset.json")
+NETWORK_PATH = os.path.join(PROJECT_ROOT, "data", "network_dataset.json")
 
 def load_phishing_data() -> List[Dict]:
     """

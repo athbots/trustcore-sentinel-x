@@ -83,7 +83,7 @@ def get_metrics():
         import json
         with open(results_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    except Exception as e:
+    except Exception:
         return {"error": "Metrics not generated yet. Run evaluation/evaluate_models.py"}
 
 

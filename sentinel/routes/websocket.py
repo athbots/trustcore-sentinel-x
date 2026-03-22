@@ -15,12 +15,22 @@ router = APIRouter()
 async def websocket_feed(websocket: WebSocket):
     """
     WebSocket endpoint for real-time event feed.
-    Clients connect here to receive live threat analysis results
-    as they are processed by the pipeline.
+    Requires 'api_key' query parameter for authentication.
     """
+    from sentinel.core.auth import get_api_key
+    
+    api_key = websocket.query_params.get("api_key")
+    expected = get_api_key()
+
+    # Validate key before accepting
+    if expected and api_key != expected:
+        # 1008 = Policy Violation
+        await websocket.close(code=1008)
+        return
+
     await websocket.accept()
     register_ws(websocket)
-    logger.info("WebSocket client connected")
+    logger.info("WebSocket client authenticated and connected")
 
     try:
         while True:

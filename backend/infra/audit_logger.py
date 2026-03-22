@@ -1,9 +1,6 @@
 import json
 import os
-import uuid
-import time
 from datetime import datetime
-from fastapi import Request
 
 AUDIT_LOG_FILE = os.path.join(os.path.dirname(__file__), "..", "logs", "audit.json")
 

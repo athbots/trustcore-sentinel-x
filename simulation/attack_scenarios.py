@@ -12,7 +12,6 @@ Usage:
 import sys
 import time
 import requests
-import json
 import logging
 
 # Disable standard python requests logging
@@ -188,7 +187,8 @@ def run_scenario(scenario_id: str):
             return
 
     # Process Final Results
-    if not final_result: return
+    if not final_result:
+        return
 
     chain = final_result.get("attack_chain", {})
     entity = final_result.get("entity_profile", {})
@@ -238,8 +238,8 @@ def menu():
         print_header("TrustCore Sentinel X — Attack Simulation Lab")
         for key, sc in SCENARIOS.items():
             print(f"  [{key}] {sc['name']}")
-        print(f"  [A] Run All Scenarios Sequentially")
-        print(f"  [Q] Quit")
+        print("  [A] Run All Scenarios Sequentially")
+        print("  [Q] Quit")
         
         choice = input(f"\n{C['bold']}Select scenario > {C['reset']}").strip().upper()
         
@@ -257,7 +257,7 @@ def menu():
 if __name__ == "__main__":
     try:
         requests.get("http://127.0.0.1:8000/health", timeout=2)
-    except:
+    except Exception:
         print(f"{C['red']}❌ Error: Backend API is not running. Please start it on port 8000.{C['reset']}")
         sys.exit(1)
         

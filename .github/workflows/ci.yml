@@ -34,18 +34,14 @@ jobs:
           pip install pytest ruff
 
       - name: Lint with Ruff
-        run: ruff check backend/ models/ scripts/ sentinel/
+        run: ruff check backend/ simulation/ tests/ cli.py evaluation/
 
-      - name: Run Phishing Model Smoke Test
-        run: python models/phishing_model.py
-
-      - name: Run Anomaly Model Smoke Test
-        run: python models/anomaly_model.py
-
-      - name: Run Simulation Pipeline
-        run: python -X utf8 scripts/simulate_attacks.py
+      - name: Run Model Evaluation Pipeline (Generates results.json)
+        run: python evaluation/evaluate_models.py
 
       - name: Run Pytest Suite
+        env:
+          TRUSTCORE_API_KEY: trustcore-super-secret-key-2026
         run: pytest tests/ -x -v
 
   docker:

@@ -1,0 +1,181 @@
+F401 [*] `typing.Any` imported but unused
+  --> backend\domain\models\core.py:9:36
+   |
+ 7 | """
+ 8 |
+ 9 | from typing import List, Optional, Any
+   |                                    ^^^
+10 | from pydantic import BaseModel, Field, field_validator
+11 | import re
+   |
+help: Remove unused import: `typing.Any`
+
+F401 [*] `uuid` imported but unused
+ --> backend\infra\audit_logger.py:3:8
+  |
+1 | import json
+2 | import os
+3 | import uuid
+  |        ^^^^
+4 | import time
+5 | from datetime import datetime
+  |
+help: Remove unused import: `uuid`
+
+F401 [*] `time` imported but unused
+ --> backend\infra\audit_logger.py:4:8
+  |
+2 | import os
+3 | import uuid
+4 | import time
+  |        ^^^^
+5 | from datetime import datetime
+6 | from fastapi import Request
+  |
+help: Remove unused import: `time`
+
+F401 [*] `fastapi.Request` imported but unused
+ --> backend\infra\audit_logger.py:6:21
+  |
+4 | import time
+5 | from datetime import datetime
+6 | from fastapi import Request
+  |                     ^^^^^^^
+7 |
+8 | AUDIT_LOG_FILE = os.path.join(os.path.dirname(__file__), "..", "logs", "audit.json")
+  |
+help: Remove unused import: `fastapi.Request`
+
+F841 [*] Local variable `e` is assigned to but never used
+  --> backend\main.py:86:25
+   |
+84 |         with open(results_path, "r", encoding="utf-8") as f:
+85 |             return json.load(f)
+86 |     except Exception as e:
+   |                         ^
+87 |         return {"error": "Metrics not generated yet. Run evaluation/evaluate_models.py"}
+   |
+help: Remove assignment to unused variable `e`
+
+F401 `fastapi` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> cli.py:74:16
+   |
+72 |     """Ensure host dependencies exist if executing natively through interpreter."""
+73 |     try:
+74 |         import fastapi
+   |                ^^^^^^^
+75 |         import uvicorn
+76 |         import sklearn
+   |
+help: Remove unused import: `fastapi`
+
+F401 `uvicorn` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> cli.py:75:16
+   |
+73 |     try:
+74 |         import fastapi
+75 |         import uvicorn
+   |                ^^^^^^^
+76 |         import sklearn
+77 |     except ImportError:
+   |
+help: Remove unused import: `uvicorn`
+
+F401 `sklearn` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> cli.py:76:16
+   |
+74 |         import fastapi
+75 |         import uvicorn
+76 |         import sklearn
+   |                ^^^^^^^
+77 |     except ImportError:
+78 |         print(f"{Fore.RED}ERROR: Core AI/API dependencies are missing. Run `pip install -r requirements.txt`{Style.RESET_ALL}")
+   |
+help: Remove unused import: `sklearn`
+
+F401 [*] `json` imported but unused
+  --> simulation\attack_scenarios.py:15:8
+   |
+13 | import time
+14 | import requests
+15 | import json
+   |        ^^^^
+16 | import logging
+   |
+help: Remove unused import: `json`
+
+E701 Multiple statements on one line (colon)
+   --> simulation\attack_scenarios.py:191:24
+    |
+190 |     # Process Final Results
+191 |     if not final_result: return
+    |                        ^
+192 |
+193 |     chain = final_result.get("attack_chain", {})
+    |
+
+F541 [*] f-string without any placeholders
+   --> simulation\attack_scenarios.py:241:15
+    |
+239 |         for key, sc in SCENARIOS.items():
+240 |             print(f"  [{key}] {sc['name']}")
+241 |         print(f"  [A] Run All Scenarios Sequentially")
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+242 |         print(f"  [Q] Quit")
+    |
+help: Remove extraneous `f` prefix
+
+F541 [*] f-string without any placeholders
+   --> simulation\attack_scenarios.py:242:15
+    |
+240 |             print(f"  [{key}] {sc['name']}")
+241 |         print(f"  [A] Run All Scenarios Sequentially")
+242 |         print(f"  [Q] Quit")
+    |               ^^^^^^^^^^^^^
+243 |         
+244 |         choice = input(f"\n{C['bold']}Select scenario > {C['reset']}").strip().upper()
+    |
+help: Remove extraneous `f` prefix
+
+E722 Do not use bare `except`
+   --> simulation\attack_scenarios.py:260:5
+    |
+258 |     try:
+259 |         requests.get("http://127.0.0.1:8000/health", timeout=2)
+260 |     except:
+    |     ^^^^^^
+261 |         print(f"{C['red']}Γ¥î Error: Backend API is not running. Please start it on port 8000.{C['reset']}")
+262 |         sys.exit(1)
+    |
+
+F401 [*] `pytest` imported but unused
+ --> tests\test_analysis.py:1:8
+  |
+1 | import pytest
+  |        ^^^^^^
+2 | from backend.services.phishing_service import analyze_phishing
+3 | from backend.services.anomaly_service import analyze_anomaly
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `pytest` imported but unused
+ --> tests\test_api.py:1:8
+  |
+1 | import pytest
+  |        ^^^^^^
+2 | from fastapi.testclient import TestClient
+3 | from backend.main import app
+  |
+help: Remove unused import: `pytest`
+
+F401 [*] `pytest` imported but unused
+ --> tests\test_risk.py:1:8
+  |
+1 | import pytest
+  |        ^^^^^^
+2 | from backend.services.risk_engine import compute_risk
+  |
+help: Remove unused import: `pytest`
+
+Found 16 errors.
+[*] 11 fixable with the `--fix` option.

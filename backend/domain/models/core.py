@@ -6,7 +6,7 @@ of the system. These models are free of any framework-specific
 (FastAPI) encumbrances.
 """
 
-from typing import List, Optional, Any
+from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 import re
 
