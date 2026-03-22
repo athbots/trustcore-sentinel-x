@@ -4,37 +4,17 @@ Uses Isolation Forest (pre-fitted on synthetic normal traffic baseline).
 Detects: port scans, DDoS, data exfiltration, brute force, lateral movement.
 """
 
+import os
+import sys
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from typing import Dict, List, Tuple
 
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
-# ── Synthetic Baseline: Normal Network Traffic ────────────────────────────────
-# Shape: [bytes_sent, bytes_received, duration_seconds, failed_logins, packet_count, port_risk]
-
-np.random.seed(42)
-
-NORMAL_TRAFFIC = np.column_stack([
-    np.random.normal(5000, 2000, 500),     # bytes_sent
-    np.random.normal(8000, 3000, 500),     # bytes_received
-    np.random.uniform(0.5, 30, 500),       # duration_seconds
-    np.zeros(500),                          # failed_logins (0 for normal)
-    np.random.randint(10, 200, 500),       # packet_count
-    np.random.choice([0, 1], 500, p=[0.9, 0.1]),  # port_risk (low risk ports mostly)
-])
-
-# Clamp negatives
-NORMAL_TRAFFIC = np.abs(NORMAL_TRAFFIC)
-
-# Fit the model once at module load (fast, ~0.1s)
-_iso_forest = IsolationForest(
-    n_estimators=200,
-    contamination=0.05,
-    max_samples="auto",
-    random_state=42,
-)
-_iso_forest.fit(NORMAL_TRAFFIC)
-
+from data.loader import get_normal_network_traffic
 
 # ── Port Risk Classification ──────────────────────────────────────────────────
 
@@ -57,7 +37,6 @@ HIGH_RISK_PORTS = {
 
 MEDIUM_RISK_PORTS = {80, 8000, 8888, 25, 110, 143, 21, 20}
 
-
 def _get_port_risk(port: int) -> Tuple[float, str]:
     if port in HIGH_RISK_PORTS:
         return 1.0, f"High-risk port {port} ({HIGH_RISK_PORTS[port]})"
@@ -67,6 +46,49 @@ def _get_port_risk(port: int) -> Tuple[float, str]:
         return 0.3, f"Well-known port {port}"
     else:
         return 0.0, ""
+
+# ── Real Data Baseline: Normal Network Traffic ────────────────────────────────
+# Shape: [bytes_sent, bytes_received, duration, failed_logins, packet_count, port_risk]
+
+def _build_training_data() -> np.ndarray:
+    normal_events = get_normal_network_traffic()
+    if not normal_events:
+        print("[Anomaly Detector] Warning: No dataset found. Falling back to synthetic baseline.")
+        np.random.seed(42)
+        traffic = np.column_stack([
+            np.random.normal(5000, 2000, 500),
+            np.random.normal(8000, 3000, 500),
+            np.random.uniform(0.5, 30, 500),
+            np.zeros(500),
+            np.random.randint(10, 200, 500),
+            np.random.choice([0, 1], 500, p=[0.9, 0.1]),
+        ])
+        return np.abs(traffic)
+
+    matrix = []
+    for ev in normal_events:
+        prisk, _ = _get_port_risk(ev.get("port", 443))
+        matrix.append([
+            float(ev.get("bytes_sent", 0)),
+            float(ev.get("bytes_received", 0)),
+            float(ev.get("duration", 1.0)),
+            float(ev.get("failed_logins", 0)),
+            float(ev.get("packet_count", 1)),
+            prisk
+        ])
+    return np.array(matrix)
+
+NORMAL_TRAFFIC = _build_training_data()
+
+# Fit the model once at module load (fast, ~0.1s)
+_iso_forest = IsolationForest(
+    n_estimators=200,
+    contamination=0.05,
+    max_samples="auto",
+    random_state=42,
+)
+_iso_forest.fit(NORMAL_TRAFFIC)
+print(f"[Anomaly Detector] Isolation Forest fitted on {len(NORMAL_TRAFFIC)} baseline events.")
 
 
 def _detect_attack_patterns(event: Dict) -> List[Tuple[float, str]]:

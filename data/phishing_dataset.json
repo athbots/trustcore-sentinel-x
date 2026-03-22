@@ -1,0 +1,22 @@
+[
+  {"text": "Hey team, attached is the Q3 financial report for review. Let me know if you have questions.", "label": 0},
+  {"text": "URGENT: Your PayPal account has been limited due to unusual activity. Click here to verify your identity within 24 hours.", "label": 1},
+  {"text": "Reminder: Board meeting is scheduled for tomorrow at 10 AM in Conference Room B.", "label": 0},
+  {"text": "ACTION REQUIRED: Update your Office365 billing details immediately to avoid account suspension. Link: http://micro0soft-update.xyz/login", "label": 1},
+  {"text": "Hi Bob, can you send over the latest server logs when you have a chance?", "label": 0},
+  {"text": "Security Alert: We detected a new login from Russia. If this wasn't you, secure your account below: http://secure-auth-update.tk", "label": 1},
+  {"text": "Lunch is here! It's in the breakroom.", "label": 0},
+  {"text": "Your Amazon order #112-9843-22 has been cancelled due to payment failure. Enter your credit card details to restore the order.", "label": 1},
+  {"text": "Thanks for signing up for our newsletter. You will receive weekly updates on our products.", "label": 0},
+  {"text": "Dear Customer, your bank account is locked. Download the attached PDF statement and follow instructions to unlock.", "label": 1},
+  {"text": "Are we still on for coffee later today?", "label": 0},
+  {"text": "IT Dept: Please reset your Windows password immediately. A mandatory policy update requires all employees to click the link below.", "label": 1},
+  {"text": "The project deadline has been extended to Friday. Let's make sure we wrap up testing by Thursday.", "label": 0},
+  {"text": "Final warning: Your email storage is full. Upgrade now or lose incoming messages. Click to upgrade your mailbox capacity.", "label": 1},
+  {"text": "I reviewed the PR, looked good! I just left a few inline comments. - Sarah", "label": 0},
+  {"text": "Notice of Tax Return discrepancy: IRS has flagged your profile. Click here to resolve tax issue and avoid penalties.", "label": 1},
+  {"text": "Weekly standup notes: We covered the UI revamp and API latency issues.", "label": 0},
+  {"text": "Confirm your Netflix subscription update login below. You must act within 48 hours to maintain access.", "label": 1},
+  {"text": "Hello, it's John from HR. Here is the link to the updated employee handbook for 2026.", "label": 0},
+  {"text": "Congratulations! You've been selected for a $500 gift card. Claim it now at this secure login portal.", "label": 1}
+]

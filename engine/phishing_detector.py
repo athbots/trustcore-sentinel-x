@@ -6,7 +6,20 @@ No training required — works immediately out of the box.
 
 import re
 import math
+import os
+import sys
 from typing import List, Tuple, Dict
+
+# Machine Learning components
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+
+# Add project root to sys path for internal imports
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+from data.loader import load_phishing_data
 
 
 # ── Phishing Signal Patterns ─────────────────────────────────────────────────
@@ -37,6 +50,34 @@ OBFUSCATION_PATTERNS = [
     r'\b(0|1|3|4|5)[a-z]',     # Digit-letter combos
     r'[^\x00-\x7F]',            # Non-ASCII characters (unicode lookalikes)
 ]
+
+
+# ── ML Model Initialization ──────────────────────────────────────────────────
+
+_vectorizer = TfidfVectorizer(max_features=1000, stop_words="english", ngram_range=(1, 2))
+_classifier = LogisticRegression(class_weight="balanced", random_state=42)
+_ml_enabled = False
+
+def _initialize_ml_model():
+    global _ml_enabled
+    dataset = load_phishing_data()
+    if not dataset:
+        print("[Phishing Detector] Warning: No dataset found. Falling back to rule-based only.")
+        return
+
+    texts = [item.get("text", "") for item in dataset]
+    labels = [item.get("label", 0) for item in dataset]
+    
+    if len(set(labels)) > 1:
+        X = _vectorizer.fit_transform(texts)
+        _classifier.fit(X, labels)
+        _ml_enabled = True
+        print(f"[Phishing Detector] ML Model active. Trained on {len(texts)} realistic samples.")
+    else:
+        print("[Phishing Detector] Warning: Dataset needs both normal and phishing samples.")
+
+_initialize_ml_model()
+
 
 
 def _count_pattern_matches(text: str, patterns: List[str]) -> Tuple[int, List[str]]:
@@ -117,6 +158,16 @@ def analyze_email(subject: str, body: str, sender: str) -> Dict:
     if len(body.split()) < 15:
         raw_score += 5
         indicators.append("Unusually short email body")
+
+    # 7. ML Model Evaluation
+    if _ml_enabled:
+        X_test = _vectorizer.transform([combined_text])
+        ml_prob = _classifier.predict_proba(X_test)[0][1] # Probability of phishing
+        ml_score_contribution = ml_prob * 30.0
+        raw_score += ml_score_contribution
+        
+        if ml_prob > 0.6:
+            indicators.append(f"AI Model Alert: High probability ({ml_prob:.0%}) of phishing attributes")
 
     # Normalize to 0–100
     phishing_score = min(raw_score, 100.0)
