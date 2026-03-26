@@ -7,12 +7,12 @@ from fastapi import APIRouter, Depends
 from services.response_engine import get_recent_actions, get_action_stats
 from infra.config import SYSTEM_NAME, SYSTEM_VERSION
 from infra.security import verify_api_key, rate_limit
+from schemas.system import SystemStatusResponse
 
 router = APIRouter()
 _START_TIME = time.time()
 
-
-@router.get("/system_status", dependencies=[Depends(verify_api_key), Depends(rate_limit)])
+@router.get("/system_status", response_model=SystemStatusResponse, dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 async def system_status():
     """Return live system uptime, event counts, and recent response actions."""
     uptime_seconds = int(time.time() - _START_TIME)
@@ -32,13 +32,13 @@ async def system_status():
     }
 
     if state.last_result:
-        response["risk_score"] = state.last_result["risk"]["risk_score"]
-        response["threat_level"] = state.last_result["risk"]["threat_level"]
-        response["action"] = state.last_result["response"]["action"]
-        response["timestamp"] = state.last_result["timestamp"]
+        # Map state keys to schema keys
+        response["risk_score"] = state.last_result.get("risk_score")
+        response["threat_level"] = state.last_result.get("risk", {}).get("threat_level")
+        response["action"] = state.last_result.get("response", {}).get("action")
+        response["timestamp"] = state.last_result.get("timestamp")
 
     return response
-
 
 def _fmt_uptime(s: int) -> str:
     h, rem = divmod(s, 3600)

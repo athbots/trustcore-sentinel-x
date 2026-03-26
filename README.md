@@ -1,242 +1,68 @@
-<p align="center">
-  <img src="assets/banner.png" alt="TrustCore Sentinel X Banner" width="100%">
-</p>
+# 🛡️ TrustCore Sentinel™
+### Enterprise AI Trust Infrastructure & Endpoint Intelligence
 
-<h1 align="center">🛡️ TrustCore Sentinel X</h1>
-
-> **A lightweight experimental threat detection & response system combining machine learning, attack simulation, and explainable analysis.**
-
-<p align="center">
-  <img src="https://img.shields.io/badge/status-Experimental-orange?style=flat-square" />
-  <img src="https://img.shields.io/badge/python-3.10+-blue?style=flat-square" />
-  <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" />
-  <img src="https://img.shields.io/badge/ML-Scikit--Learn%20%7C%20FastAPI-ff2d55?style=flat-square" />
-</p>
+TrustCore Sentinel™ is a production-grade, 100% data-driven cybersecurity platform designed for high-fidelity endpoint monitoring, stateful anomaly detection, and autonomous trust evaluation.
 
 ---
 
-## ⚠️ Honest Disclaimer
+## 🚀 Quick Start (Production Boot)
 
-This project is an **experimental cybersecurity system** built for learning, simulation, and demonstration.
+Transform your machine into a monitored asset in less than 30 seconds.
 
-- Not production-ready  
-- Not externally audited  
-- Runs in controlled environments only  
-
-> The goal is to demonstrate how modern detection systems are built.
-
----
-
-## 🧠 What This Project Actually Does
-
-TrustCore Sentinel X simulates a **mini Endpoint Detection & Response (EDR)** pipeline:
-
-- Detects phishing attempts using NLP  
-- Identifies anomalous behavior using ML  
-- Correlates events into multi-stage attack chains  
-- Generates explainable threat intelligence  
-- Simulates automated response decisions  
+1. **Initialize Environment**:
+   Double-click `run.bat` (Windows) or execute `pip install -r requirements.txt`.
+2. **Launch Console**:
+   The `run.bat` script will automatically start the server on **Port 5050**.
+3. **Access Intelligence**:
+   Open [http://127.0.0.1:5050](http://127.0.0.1:5050) in your browser.
 
 ---
 
-## ⚡ Core Capabilities
+## 🏛️ System Architecture
 
-### 🔍 ML-Based Threat Detection
+### 🧠 Stateful Anomaly Engine
+Uses a rolling telemetry window (40 samples) and kernel-level observation to detect sudden architectural spikes in CPU, RAM, and Process entropy.
 
-**Phishing Detection**
-- TF-IDF + Logistic Regression  
-- Detects urgency, spoofing, credential harvesting  
+### ⚖️ Technical Trust Fabric
+Enforces a 4-tier decision model mapping physical signals to authoritative security states:
+- **ALLOW (>75)**: Optimal security posture.
+- **MONITOR (50-75)**: Preemptive resource observation.
+- **CHALLENGE (25-50)**: Behavioral verification required.
+- **BLOCK (<25)**: Infrastructure breach mitigation triggered.
 
-**Anomaly Detection**
-- Isolation Forest  
-- Identifies abnormal traffic patterns  
-
----
-
-### 🧪 Attack Simulation Lab
-
-Simulates realistic attack scenarios:
-
-- Targeted phishing → suspicious login  
-- Brute-force attempts  
-- Data exfiltration  
-- Multi-stage APT chains  
-
-Outputs include:
-
-- Risk score progression  
-- Detection probability  
-- Explanation ("WHY FLAGGED")  
-- Attack chain correlation  
+### 📊 Real-Time Telemetry
+100% data-driven visuals sourcing live data from the host machine via `psutil` and the internal Heuristics Engine. No mock data or random generators are present in this infrastructure.
 
 ---
 
-### 🧠 Explainable Intelligence
+## 🛠️ Deployment & Execution
 
-Every detection includes:
-
-```json
-{
-  "risk_score": 78,
-  "confidence": 0.84,
-  "signals": ["phishing_pattern", "anomalous_login"],
-  "reason": "Suspicious login following phishing pattern"
-}
+### Local Production
+```powershell
+./run.bat
 ```
 
----
-
-### 🔗 Attack Chain Correlation
-
-- Tracks attacker behavior across multiple events
-- Maps sequences to known attack patterns
-- Detects multi-stage threats
-
----
-
-### 👤 Entity Intelligence
-
-- Tracks per-IP behavior
-- Applies adaptive risk multipliers
-- Flags repeat offenders
-
----
-
-### 🔐 API Security
-
-- API Key Authentication (`X-API-Key`)
-- Rate limiting
-- Input validation (Pydantic)
-- Structured audit logging
-
----
-
-## 📊 Model Evaluation
-
-Run evaluation:
-
+### Manual Backend Execution
 ```bash
-python evaluation/evaluate_models.py
+uvicorn backend.main:app --host 127.0.0.1 --port 5050
 ```
 
-Metrics generated:
-
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-
-Stored in:
-
-```
-evaluation/results.json
-```
-
----
-
-## 📂 Project Structure
-
-```
-backend/
-  api/
-  services/
-  domain/
-  infra/
-
-simulation/
-evaluation/
-tests/
-frontend/
-```
-
----
-
-## 🚀 Run Locally
-
-### 1. Install dependencies
-
+### Packaging (Portable Executable)
+To build a standalone `.exe`:
 ```bash
-pip install -r requirements.txt
-```
-
-### 2. Start backend
-
-```bash
-uvicorn backend.main:app --port 8000
-```
-
-### 3. Open dashboard
-
-```
-http://localhost:8000
+pyinstaller --onefile --add-data "frontend;frontend" backend/main.py
 ```
 
 ---
 
-## 🐳 Run with Docker
-
-```bash
-docker build -t sentinel .
-docker run -p 8000:8000 sentinel
-```
-
----
-
-## 🧪 Run Attack Simulation
-
-```bash
-python simulation/attack_scenarios.py
-```
-
----
-
-## 🧪 Run Tests
-
-```bash
-pytest tests/
-```
-
----
-
-## 📊 What This Project Demonstrates
-
-- End-to-end system design (API + ML + simulation)
-- Practical anomaly detection using real models
-- Explainable AI outputs
-- CI/CD + Docker pipeline
-- Secure API handling
-
----
-
-## ⚠️ Limitations
-
-- Small datasets (not production-scale)
-- No distributed architecture
-- No real-time streaming pipeline
-- No external security audit
-
----
-
-## 🛣️ Roadmap
-
-- [ ] Larger real-world datasets
-- [ ] Streaming architecture (Kafka / async pipeline)
-- [ ] Advanced ML models
-- [ ] Alerting system
-- [ ] Persistent storage (Redis/DB)
+## 📂 Infrastructure Map
+- `backend/`: High-concurrency FastAPI kernel.
+- `frontend/`: Real-time SOC dashboard (HTML5/CSS3/Vanilla JS).
+- `run.bat`: Automated production bootstrap.
+- `requirements.txt`: Unified dependency manifest.
 
 ---
 
 ## 👨‍💻 Author
-
 **Anirudh Tyagi**  
-B.Tech CSE | Systems + AI Builder  
-
----
-
-## 🤝 Why Trust This Project?
-
-- Uses real ML models
-- Provides explainable outputs
-- Includes testing and CI/CD
-- Demonstrates full system pipeline
+Principal Systems Engineer | AI Trust Infrastructure Architect

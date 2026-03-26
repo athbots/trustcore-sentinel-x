@@ -8,7 +8,8 @@ issues when uvicorn hot-reloads from the routes/ subdirectory.
 """
 
 from fastapi import APIRouter, Depends, Request
-from domain.models.core import ThreatEvent
+from fastapi import APIRouter, Depends, Request
+from domain.entities.core import ThreatEvent
 from infra.security import verify_api_key, rate_limit
 import time
 import uuid

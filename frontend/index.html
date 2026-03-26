@@ -3,169 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrustCore Sentinel™ Command Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #09090b;
-            --surface: #18181b;
-            --surface-hover: #27272a;
-            --text: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --primary: #0ea5e9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --glass: rgba(24, 24, 27, 0.7);
-        }
-        body {
-            background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif;
-            margin: 0; padding: 20px;
-        }
-        .header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--surface-hover); padding-bottom: 20px; margin-bottom: 30px;
-        }
-        .header h1 { margin: 0; font-weight: 800; font-size: 24px; letter-spacing: -0.5px; }
-        .header .badge {
-            background: rgba(14, 165, 233, 0.1); color: var(--primary);
-            padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid var(--primary);
-        }
-        .grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
-        .card {
-            background: var(--surface); border: 1px solid var(--surface-hover);
-            border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .card h3 { margin-top: 0; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
-        .score-circle {
-            width: 150px; height: 150px; border-radius: 50%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            margin: 20px auto; border: 4px solid var(--primary);
-        }
-        .score-value { font-size: 48px; font-weight: 800; }
-        .log-list { list-style: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; }
-        .log-item {
-            padding: 12px; border-bottom: 1px solid var(--surface-hover);
-            display: flex; justify-content: space-between; align-items: center;
-            transition: background 0.2s; cursor: pointer;
-        }
-        .log-item:hover { background: var(--surface-hover); }
-        .pill { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-        .pill.ALLOW { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .pill.CHALLENGE { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
-        .pill.BLOCK { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        
-        .explainer-matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;}
-        .matrix-row { background: var(--surface-hover); padding: 10px; border-radius: 8px; font-size: 13px;}
-        .matrix-row .val { float: right; font-weight: bold;}
-    </style>
+    <title>TrustCore Sentinel™ | Enterprise Cyber Defense Infrastructure</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
-<body>
-    <div class="header">
-        <h1>TrustCore Sentinel™ <span style="font-weight: 300; color: var(--text-muted)">Command Center</span></h1>
-        <div class="badge">LIVE ENTERPRISE MONITORING</div>
-    </div>
+<body class="soc-theme">
+    <div class="scanline"></div>
     
-    <div class="grid">
-        <div class="card">
-            <h3>Live Identity Trust</h3>
-            <div class="score-circle" id="live-score-circle">
-                <div class="score-value" id="live-score">--</div>
-                <div style="font-size: 12px; color: var(--text-muted)">Trust Score</div>
-            </div>
-            <div style="text-align: center; margin-top: 10px;" id="live-action">Awaiting Traffic...</div>
+    <!-- Enterprise Global Status Bar -->
+    <div class="global-status-bar">
+        <div class="status-item">
+            <span class="label">SYSTEM STATUS:</span>
+            <span class="val online" id="globalStatus">ACTIVE</span>
         </div>
-        
-        <div class="card">
-            <h3>Explainability Matrix (Last Event)</h3>
-            <div class="explainer-matrix" id="explainer-content">
-                <div class="matrix-row">Waiting for evaluation data...</div>
-            </div>
-            
-            <h3 style="margin-top: 30px;">Correlation Insights</h3>
-            <div id="correlation-content" style="font-size: 14px; line-height: 1.5; color: var(--warning);">
-                No correlation anomaly detected.
-            </div>
+        <div class="status-item">
+            <span class="label">PROCESS COUNT:</span>
+            <span class="val mono" id="nodesMonitored">0</span>
+        </div>
+        <div class="status-item">
+            <span class="label">SIGNAL TELEMETRY:</span>
+            <span class="val mono" id="threatsBlocked">0 PPS</span>
+        </div>
+        <div class="status-item">
+            <span class="label">UPTIME:</span>
+            <span class="val mono" id="uptimeDisplay">--:--:--</span>
         </div>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h3>Live Event Feed</h3>
-        <ul class="log-list" id="log-list">
-            <!-- Items populated by JS -->
-        </ul>
-    </div>
-
-    <script>
-        // Simulate WebSocket/Polling Live Data updates for Dashboard Demo
-        const logList = document.getElementById('log-list');
-        const liveScore = document.getElementById('live-score');
-        const scoreCircle = document.getElementById('live-score-circle');
-        const liveAction = document.getElementById('live-action');
-        const explainer = document.getElementById('explainer-content');
-        const correlation = document.getElementById('correlation-content');
-
-        function addLog(data) {
-            const li = document.createElement('li');
-            li.className = 'log-item';
-            
-            const time = new Date().toLocaleTimeString();
-            li.innerHTML = `
-                <div>
-                    <span style="color: var(--text-muted); font-size: 12px; margin-right: 15px;">${time}</span>
-                    <strong>${data.user_id}</strong> (${data.ip_address}) — Action: ${data.action}
+    <!-- Top HUD Navigation -->
+    <header class="hud-header">
+        <div class="hud-left">
+            <div class="logo-container">
+                <span class="logo-icon">🛡️</span>
+                <div class="logo-text">
+                    <h1>TRUSTCORE <span class="accent">SENTINEL™</span></h1>
+                    <span class="sub-logo">GLOBAL THREAT INTELLIGENCE FABRIC</span>
                 </div>
-                <div class="pill ${data.decision}">${data.decision}</div>
-            `;
-            logList.prepend(li);
-            
-            // Update HUD
-            liveScore.innerText = data.score;
-            if(data.score < 40) scoreCircle.style.borderColor = 'var(--danger)';
-            else if(data.score < 75) scoreCircle.style.borderColor = 'var(--warning)';
-            else scoreCircle.style.borderColor = 'var(--success)';
-            
-            liveAction.innerText = `Decision: ${data.decision} (Latency: ${data.latency}ms)`;
-            
-            // Render Explainer Breakdown
-            let html = "";
-            let riskReasons = [];
-            if(data.explainer) {
-                data.explainer.engine_contributions.forEach(eng => {
-                    html += `<div class="matrix-row">${eng.engine} <span class="val">${Math.round(eng.score)}/100</span></div>`;
-                });
-                explainer.innerHTML = html;
-                
-                if(data.explainer.correlation_analysis) {
-                    correlation.innerHTML = data.explainer.correlation_analysis.map(c => `<div>⚠️ ${c}</div>`).join("");
-                }
-            }
-        }
-
-        // Mock event stream just for visual UI testing if backend is not wired to websockets yet
-        // In real deploy, this hooks to Kafka/FastAPI WebSockets
-        setInterval(async () => {
-            // Using placeholder logic directly in the UI *only* if fetch fails to visually show layout
-            // Actually, we'll wait for the simulate_enterprise.py to hit the endpoints, and UI will rely on local fetch
-            try {
-                // If we built a '/metrics/latest' endpoint
-            } catch(e) {}
-        }, 3000);
+            </div>
+            <div class="system-status-pill">
+                <div class="status-dot online" id="systemStatusDot"></div>
+                <span id="systemStatusLabel">LIVE</span>
+            </div>
+        </div>
         
-        // Mocking a starting state
-        addLog({
-            user_id: "emp_john_doe", ip_address: "192.168.1.50", action: "login",
-            decision: "ALLOW", score: 98, latency: 12,
-            explainer: {
-                engine_contributions: [
-                    {engine: "Identity", score: 100},
-                    {engine: "Behavior", score: 100},
-                    {engine: "Graph", score: 100},
-                    {engine: "AI NLP", score: 90}
-                ],
-                correlation_analysis: ["Signals align perfectly."]
-            }
-        })
-    </script>
+        <div class="hud-center">
+            <div class="global-threat-display">
+                <span class="threat-label">INFRASTRUCTURE STATE</span>
+                <span id="systemMode" class="system-mode mode-secure">SECURE</span>
+            </div>
+        </div>
+        
+        <div class="hud-right">
+            <div id="connectionStatus" class="connection-status">
+                <span class="status-icon">●</span>
+                <span class="status-text">INTELLIGENCE SYNC ACTIVE</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- LEFT COLUMN: Identity & Global Fabric -->
+        <aside class="sidebar-left">
+            <section class="panel card card-identity">
+                <div class="panel-header">
+                    <span class="panel-icon">👤</span>
+                    <h3>SYSTEM TRUST</h3>
+                    <div class="source-label">Source: Identity Analysis Layer</div>
+                </div>
+                <div class="panel-content">
+                    <div class="trust-gauge-container">
+                        <svg class="gauge-svg" viewBox="0 0 100 100">
+                            <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="45"></circle>
+                            <text x="50" y="55" id="gaugeScore" class="gauge-text">0</text>
+                        </svg>
+                        <div id="threatBadge" class="threat-badge badge-safe">SAFE</div>
+                        <div id="confidenceDisplay" class="confidence-tag">0% CONFIDENCE</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel card card-fabric">
+                <div class="panel-header">
+                    <span class="panel-icon">🌐</span>
+                    <h3>HARDWARE TRUST FABRIC</h3>
+                    <div class="source-label">Source: TPM Integration</div>
+                </div>
+                <div class="panel-content">
+                    <div class="fabric-container">
+                        <div class="fabric-node-row"><span>US-EAST (Primary)</span><span class="val success">HEALTHY</span></div>
+                        <div class="fabric-node-row"><span>EU-CENTRAL (Failover)</span><span class="val success">SYNCED</span></div>
+                        <div class="fabric-node-row"><span>AP-SOUTH (Edge)</span><span class="val success">ROUTING</span></div>
+                        <div class="fabric-node-row"><span>Global Mesh Latency</span><span class="val mono">12ms</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel card card-actions">
+                <div class="panel-header">
+                    <span class="panel-icon">⚡</span>
+                    <h3>CONTROL CENTER</h3>
+                    <div class="source-label">Access: Root Admin</div>
+                </div>
+                <div class="panel-content">
+                    <div class="simulation-controls">
+                        <select id="attackScenario" class="form-input scenario-select">
+                            <option value="cpu_spike">CPU Spike</option>
+                            <option value="memory_pressure">Memory Pressure</option>
+                            <option value="process_burst">Process Burst</option>
+                            <option value="file_churn">File Churn</option>
+                            <option value="mixed_attack">Mixed Attack (Critical)</option>
+                        </select>
+                        <button id="btnTriggerAttack" class="btn btn-danger btn-pulse" onclick="triggerAttack()">
+                            ⚠️ SIMULATE ATTACK
+                        </button>
+                    </div>
+                    <div class="manual-input-area">
+                        <textarea id="inputText" placeholder="Enter scan path (e.g. C:/Users)..." class="form-input"></textarea>
+                        <button id="btnAnalyze" class="btn btn-primary" onclick="runAnalysis()">RUN SYSTEM SCAN</button>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <!-- CENTER COLUMN: Graph & Behavior -->
+        <div class="center-stage">
+            <section class="panel card card-graph">
+                <div class="panel-header">
+                    <span class="panel-icon">🕸️</span>
+                    <h3>THREAT PROPAGATION GRAPH</h3>
+                    <div class="source-label">Source: Heuristic Relation Engine</div>
+                    <div class="header-tools">
+                        <span class="status-label">ACTIVE CONNECTIONS: <span id="nodeCount" class="mono">24</span></span>
+                    </div>
+                </div>
+                <div class="panel-content graph-viewport" id="graphContainer">
+                    <svg id="intelligenceGraph" width="100%" height="100%"></svg>
+                    <div class="graph-legend">
+                        <span class="dot safe"></span> Baseline
+                        <span class="dot suspicious"></span> Anomalous Cluster
+                        <span class="dot focus"></span> Zero-Day Origin
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel card card-behavior">
+                <div class="panel-header">
+                    <span class="panel-icon">📈</span>
+                    <h3>PROCESS MONITORING</h3>
+                    <div class="source-label">Source: Real-time Kernel Monitor</div>
+                </div>
+                <div class="panel-content behavior-container">
+                    <div class="timeline-header">
+                        <span>INFRASTRUCTURE ACTIVITY TIMELINE</span>
+                        <span class="mono" id="timelineUser">local-system-monitor</span>
+                    </div>
+                    <div id="behaviorTimeline" class="behavior-timeline">
+                        <!-- Events populated by JS -->
+                    </div>
+                    <div class="trend-indicators">
+                        <div class="trend-label">TRUST</div>
+                        <div id="trendTrust" class="trend-line"></div>
+                        <div class="trend-label">CPU</div>
+                        <div id="trendCpu" class="trend-line"></div>
+                        <div class="trend-label">RAM</div>
+                        <div id="trendMemory" class="trend-line"></div>
+                    </div>
+                    <div class="anomaly-spikes" id="anomalySpikes"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- RIGHT COLUMN: AI Detection & Events -->
+        <aside class="sidebar-right">
+            <section class="panel card card-ai">
+                <div class="panel-header">
+                    <span class="panel-icon">🤖</span>
+                    <h3>THREAT HEURISTICS</h3>
+                    <div class="source-label">Source: Heuristics Engine Core</div>
+                </div>
+                <div class="panel-content">
+                    <div class="ai-metrics">
+                        <div class="metric-row">
+                            <span>SUSPICIOUS PROCESSES</span>
+                            <div class="mini-bar-wrap"><div id="barPhishing" class="mini-bar"></div></div>
+                            <span id="valPhishing" class="mono">0</span>
+                        </div>
+                        <div class="metric-row">
+                            <span>MALICIOUS FILES</span>
+                            <div class="mini-bar-wrap"><div id="barAnomaly" class="mini-bar"></div></div>
+                            <span id="valAnomaly" class="mono">0</span>
+                        </div>
+                    </div>
+                    <div class="ai-verdict" id="aiVerdictBox">
+                        <div class="label">AUTOMATED VERDICT</div>
+                        <div id="chipPhishing" class="verdict-chip chip-normal">UNDETERMINED</div>
+                    </div>
+                    <div class="signals-panel" id="signalsBox">
+                        <div class="signals-list" id="signalsList"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel card card-feed">
+                <div class="panel-header">
+                    <span class="panel-icon">📜</span>
+                    <h3>THREAT INTELLIGENCE FEED</h3>
+                    <div class="source-label">Source: Local Event Bus</div>
+                    <span class="feed-count" id="feedCount">0</span>
+                </div>
+                <div class="panel-content">
+                    <div class="event-feed" id="eventFeed">
+                        <!-- Logs -->
+                    </div>
+                </div>
+            </section>
+        </aside>
+    </main>
+
+    <!-- Modal for JSON view -->
+    <div id="jsonModal" class="modal" onclick="closeModal(event)">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>RAW TELEMETRY DATAGRAM</h3>
+                <button class="modal-close" onclick="$('jsonModal').style.display='none'">×</button>
+            </div>
+            <pre class="json-content" id="jsonContent"></pre>
+        </div>
+    </div>
+
+    <!-- Active Response Alert Overlay -->
+    <div id="responseOverlay" class="response-overlay">
+        <div class="overlay-content">
+            <span id="responseIcon" class="large-icon"></span>
+            <h2 id="responseAction">ISOLATION TRIGGERED</h2>
+            <p id="responseDetail" class="mono"></p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/app.js"></script>
 </body>
 </html>
