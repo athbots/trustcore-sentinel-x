@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'trustcore_engine'
+    static_configs:
+      - targets: ['trust_engine_api:8080']
