@@ -32,22 +32,29 @@ class ProcessMonitor:
         }
         try:
             # interval=None returns percentage since last call (efficient for polling)
-            metrics["cpu_percent"] = psutil.cpu_percent(interval=None)
+            cpu = psutil.cpu_percent(interval=None)
+            # Clamp: ensure [0, 100]
+            metrics["cpu_percent"] = max(0.0, min(float(cpu or 0.0), 100.0))
+            
             mem = psutil.virtual_memory()
-            metrics["memory_percent"] = mem.percent
+            # Clamp: ensure [0, 100]
+            metrics["memory_percent"] = max(0.0, min(float(mem.percent or 0.0), 100.0))
             
             try:
-                metrics["disk_percent"] = psutil.disk_usage(os.path.splitdrive(os.getcwd())[0] + "\\").percent
+                disk_usage = psutil.disk_usage(os.path.splitdrive(os.getcwd())[0] + "\\").percent
+                metrics["disk_percent"] = max(0.0, min(float(disk_usage or 0.0), 100.0))
             except Exception:
                 metrics["disk_percent"] = 0.0
                 
             try:
                 # Optimized connection count
-                metrics["network_connections"] = len(psutil.net_connections(kind='inet'))
+                conns = psutil.net_connections(kind='inet')
+                metrics["network_connections"] = max(0, len(conns))
             except (psutil.AccessDenied, Exception):
                 metrics["network_connections"] = 0
                 
         except Exception:
+            # Critical telemetry failure - safe fallback already in 'metrics'
             pass 
         return metrics
 
@@ -82,8 +89,12 @@ class ProcessMonitor:
                     
                     risk_score = min(risk_score, 100)
 
+                    # Clamp individual process metrics
+                    cpu_p = max(0.0, min(float(cpu_p), 100.0))
+                    mem_p = max(0.0, min(float(mem_p), 100.0))
+
                     processes.append({
-                        "pid": pinfo['pid'],
+                        "pid": pinfo.get('pid', 0),
                         "name": name,
                         "user": pinfo.get('username') or "N/A",
                         "cpu": round(cpu_p, 1),

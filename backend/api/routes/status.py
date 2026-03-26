@@ -8,37 +8,36 @@ from services.response_engine import get_recent_actions, get_action_stats
 from infra.config import SYSTEM_NAME, SYSTEM_VERSION
 from infra.security import verify_api_key, rate_limit
 from schemas.system import SystemStatusResponse
+from api.utils import get_safe_response, standardize_response
 
 router = APIRouter()
 _START_TIME = time.time()
 
-@router.get("/system_status", response_model=SystemStatusResponse, dependencies=[Depends(verify_api_key), Depends(rate_limit)])
+@router.get("/system_status", dependencies=[Depends(verify_api_key), Depends(rate_limit)])
 async def system_status():
-    """Return live system uptime, event counts, and recent response actions."""
-    uptime_seconds = int(time.time() - _START_TIME)
-    stats = get_action_stats()
-    recent = get_recent_actions(limit=10)
-
-    import state
-
-    response = {
-        "system": SYSTEM_NAME,
-        "version": SYSTEM_VERSION,
-        "status": "OPERATIONAL",
-        "uptime_seconds": uptime_seconds,
-        "uptime_human": _fmt_uptime(uptime_seconds),
-        "event_stats": stats,
-        "recent_actions": recent,
-    }
-
-    if state.last_result:
-        # Map state keys to schema keys
-        response["risk_score"] = state.last_result.get("risk_score")
-        response["threat_level"] = state.last_result.get("risk", {}).get("threat_level")
-        response["action"] = state.last_result.get("response", {}).get("action")
-        response["timestamp"] = state.last_result.get("timestamp")
-
-    return response
+    """Return live system status in standardized format."""
+    try:
+        import state
+        from core.process_monitor import ProcessMonitor
+        pm = ProcessMonitor()
+        os_metrics = pm.get_system_metrics()
+        
+        # Merge with last result if available
+        res = state.last_result if state.last_result else {}
+        
+        standard_data = {
+            "trust_score": float(res.get("risk_score", 100)),
+            "risk_level": str(res.get("risk", {}).get("threat_level", "SAFE")),
+            "decision": str(res.get("response", {}).get("action", "ALLOW")),
+            "cpu": float(os_metrics.get("cpu_percent", 0.0)),
+            "memory": float(os_metrics.get("memory_percent", 0.0)),
+            "process_count": int(len(pm.get_running_processes())),
+            "status": "System Operational"
+        }
+        
+        return standardize_response(standard_data)
+    except Exception as e:
+        return get_safe_response("/system_status", e)
 
 def _fmt_uptime(s: int) -> str:
     h, rem = divmod(s, 3600)

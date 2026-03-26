@@ -1,0 +1,21 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\aniru\OneDrive\Desktop\ATP\trustcore-sentinel-x
+configfile: pyproject.toml
+plugins: anyio-4.12.1, langsmith-0.7.17
+collected 2 items / 1 error
+
+=================================== ERRORS ====================================
+_____________________ ERROR collecting tests/test_api.py ______________________
+tests\test_api.py:2: in <module>
+    from backend.main import app
+backend\main.py:22: in <module>
+    from api.routes.simulate import router as simulate_router
+backend\api\routes\simulate.py:5: in <module>
+    router = APIRouter()
+             ^^^^^^^^^
+E   NameError: name 'APIRouter' is not defined
+=========================== short test summary info ===========================
+ERROR tests/test_api.py - NameError: name 'APIRouter' is not defined
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.37s ===============================

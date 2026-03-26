@@ -82,11 +82,11 @@ class TrustEngine:
                 
             status_message = f"ACTIVE DEFENSE: {str(scenario).upper().replace('_', ' ')}"
                 
-        # Real-time jitter for heartbeat visual
+        # Real-time jitter REMOVED as per production stability mandate
         final_score = self.base_score - deductions
-        final_score += (random.random() * 0.6) - 0.3 
         
-        final_score = max(0.0, min(100.0, final_score))
+        # Clamp: ensure [0, 100]
+        final_score = max(0.0, min(100.0, float(final_score)))
         
         if not explanations:
             explanations.append("System integrity verified. No threats detected.")
