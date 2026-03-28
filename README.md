@@ -3,6 +3,8 @@
 
 TrustCore Sentinel™ is a production-grade, 100% data-driven cybersecurity platform designed for high-fidelity endpoint monitoring, stateful anomaly detection, and autonomous trust evaluation.
 
+AI | Machine Learning | Robotics | IoT | Cybersecurity | Python | Automation
+
 ---
 
 ## 🚀 Quick Start (Production Boot)
@@ -53,8 +55,20 @@ To build a standalone `.exe`:
 ```bash
 pyinstaller --onefile --add-data "frontend;frontend" backend/main.py
 ```
+
+
 ---
-# Initilizing system
+
+## 📂 Infrastructure Map
+- `backend/`: High-concurrency FastAPI kernel.
+- `frontend/`: Real-time SOC dashboard (HTML5/CSS3/Vanilla JS).
+- `run.bat`: Automated production bootstrap.
+- `requirements.txt`: Unified dependency manifest.
+
+---
+
+## Demo
+Initilizing system
 <img width="2037" height="1185" alt="image" src="https://github.com/user-attachments/assets/3e586b63-ee62-466e-a884-4d47080172ae" />
 
 Allowing access
@@ -68,15 +82,6 @@ Threat neutralized safely
 <img width="2554" height="1478" alt="image" src="https://github.com/user-attachments/assets/58d09b24-96ce-4d7b-8bc9-50e44d2ff333" />
 
 ---
-
-## 📂 Infrastructure Map
-- `backend/`: High-concurrency FastAPI kernel.
-- `frontend/`: Real-time SOC dashboard (HTML5/CSS3/Vanilla JS).
-- `run.bat`: Automated production bootstrap.
-- `requirements.txt`: Unified dependency manifest.
-
----
-
 ## 👨‍💻 Author
 **Anirudh Tyagi**  
 Principal Systems Engineer | AI Trust Infrastructure Architect
