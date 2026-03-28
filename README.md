@@ -32,10 +32,14 @@ Enforces a 4-tier decision model mapping physical signals to authoritative secur
 
 ### 📊 Real-Time Telemetry
 100% data-driven visuals sourcing live data from the host machine via `psutil` and the internal Heuristics Engine. No mock data or random generators are present in this infrastructure.
+
 safe 
 <img width="2559" height="1476" alt="image" src="https://github.com/user-attachments/assets/5e48e8dc-1bd4-4bec-b024-9a8b4db73991" />
 a mixed attack deployed 
 <img width="2559" height="1478" alt="image" src="https://github.com/user-attachments/assets/da7ddc31-e207-436f-bf52-3b7132ffdb55" />
+Threat neutralized safely 
+<img width="2554" height="1478" alt="image" src="https://github.com/user-attachments/assets/58d09b24-96ce-4d7b-8bc9-50e44d2ff333" />
+
 
 ---
 
